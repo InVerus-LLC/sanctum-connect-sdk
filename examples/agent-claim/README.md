@@ -7,9 +7,10 @@ administrator claims it, then, given the ID of a delegation that person made, ge
 `agentResourceRequest`. Tokens are never printed. The private key stays in memory here; a real runtime keeps it in its
 own secret store or KMS. `jose` signs the assertion; the SDK only sends it.
 
-## Run it against the local stack
+## Run with a separately configured issuer
 
-1. `npm run dev` (it registers Sanctum Payments, a simulator, and the Sanctum Connections relay as resource servers).
+1. Start a compatible development issuer separately at `http://localhost:4400` and register the
+   intended resource server. This SDK repository does not start a backend or simulator.
 2. Run:
 
    ```sh
@@ -22,7 +23,13 @@ own secret store or KMS. `jose` signs the assertion; the SDK only sends it.
 4. On the Agents page, delegate some tools of that resource server to the agent, then paste the delegation ID into the
    agent's prompt. It prints `Token: issued for the delegation`.
 
-## Tested
+## Verification scope
+
+References below to `tests/integration` or `tests/e2e` belong to the separate private service
+repository. This public repository verifies packed-consumer types and builds; it does not
+include those issuer-backed tests or establish live provider acceptance.
+
+### Recorded checks
 
 `tests/integration/agent-claim-example.test.ts` spawns this file against the local issuer: registration, code and QR
 code, claim, delegation and the token request through the SDK, with no token or secret in the output.

@@ -5,9 +5,10 @@ from `/callback` to `/`. The home page is a server component that renders the ex
 component with the sign-in drawer, the signed-in account with Sign out (tokens revoked, then Sanctum's session ended)
 and a Sanctum wallet session that signs "Hello Sanctum". `/callback` finishes the sign-in once and goes home.
 
-## Run it against the local stack
+## Run with a separately configured issuer
 
-1. `npm run dev` (issuer on `http://localhost:4400`).
+1. Start a compatible Sanctum Connect issuer separately. These instructions assume a development issuer
+   at `http://localhost:4400`; this SDK repository does not contain the service or an `npm run dev` command.
 2. In the console, create a **public** test app with the redirect URI `http://127.0.0.1:5175/callback` and the
    post-logout redirect URI `http://127.0.0.1:5175/`; in its wallet kit allow the origin `http://127.0.0.1:5175`, Base
    Sepolia (`eip155:84532`) and `personal_sign`.
@@ -23,7 +24,13 @@ and a Sanctum wallet session that signs "Hello Sanctum". `/callback` finishes th
 `transpilePackages` in [next.config.mjs](next.config.mjs) is only needed inside this repository, where the SDK resolves
 to its TypeScript source; with the published packages it is harmless.
 
-## Tested
+## Verification scope
+
+References below to `tests/integration` or `tests/e2e` belong to the separate private service
+repository. This public repository verifies packed-consumer types and builds; it does not
+include those issuer-backed tests or establish live provider acceptance.
+
+### Recorded checks
 
 `npm run sdk:consumer -- <dir outside the repo> --deps-from-workspace --next` installs the packed tarballs into a
 throwaway project and runs `next build` on this example (Next.js 16.4.6, offline): the SDK is imported from server

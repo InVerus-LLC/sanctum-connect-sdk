@@ -14,9 +14,10 @@ then Sanctum's RP-initiated logout). It is a public client: PKCE and no secret; 
 The files are `.tsx` without JSX only so that the repository's Node-typed root TypeScript project leaves this DOM code
 to the DOM-typed SDK project (`packages/connect-react/tsconfig.json` type-checks it).
 
-## Run it against the local stack
+## Run with a separately configured issuer
 
-1. `npm run dev` (issuer on `http://localhost:4400`).
+1. Start a compatible Sanctum Connect issuer separately. These instructions assume a development issuer
+   at `http://localhost:4400`; this SDK repository does not contain the service or an `npm run dev` command.
 2. In the console (`http://localhost:4400/console`), create a **public** test app with the redirect URI
    `http://127.0.0.1:5173/` (exactly, with the slash) and the post-logout redirect URI `http://127.0.0.1:5173/`.
 3. Projects: under Projects, create an **App** project, choose its sign-in methods (for example passkeys and Ethereum
@@ -34,7 +35,13 @@ to the DOM-typed SDK project (`packages/connect-react/tsconfig.json` type-checks
 
 `allowInsecureLoopback: true` only permits `http://` for a `localhost`/`127.0.0.1` issuer; an `https` issuer ignores it.
 
-## Tested
+## Verification scope
+
+References below to `tests/integration` or `tests/e2e` belong to the separate private service
+repository. This public repository verifies packed-consumer types and builds; it does not
+include those issuer-backed tests or establish live provider acceptance.
+
+### Recorded checks
 
 The consumer smoke test type-checks and bundles these files against the packed SDK tarballs (browser platform, no
 Node built-ins). There is no Chrome run of this page yet; the same SDK calls run in Chrome in

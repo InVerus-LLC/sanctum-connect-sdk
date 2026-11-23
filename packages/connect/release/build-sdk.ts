@@ -30,6 +30,7 @@ type Exports = Record<string, string | { types: string; import: string }>;
 interface Publish {
   name: string; version: string; description: string; license: string; private?: boolean; engines: Record<string, string>; sideEffects: boolean | string[];
   repository: { type: string; url: string; directory: string };
+  homepage: string; bugs: { url: string }; author: { name: string }; keywords: string[];
   exports: Exports; files: string[]; publishConfig: Record<string, unknown>;
 }
 interface Manifest {
@@ -60,6 +61,7 @@ function publishedManifest(manifest: Manifest, names: PublicNames): Record<strin
     exports: publish.exports, files: publish.files,
     ...(Object.keys(dependencies).length ? { dependencies } : {}), ...(manifest.peerDependencies ? { peerDependencies: manifest.peerDependencies } : {}),
     repository: publish.repository, publishConfig: publish.publishConfig,
+    homepage: publish.homepage, bugs: publish.bugs, author: publish.author, keywords: publish.keywords,
   };
 }
 

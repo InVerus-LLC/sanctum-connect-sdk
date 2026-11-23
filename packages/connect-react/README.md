@@ -1,21 +1,51 @@
 # @inverus/connect-react
 
-React 19 bindings for [`@inverus/connect`](../connect/README.md): "Continue with Sanctum" sign-in for browser apps
+React 19 bindings for [`@inverus/connect`](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect/README.md): "Continue with Sanctum" sign-in for browser apps
 (public clients with PKCE), the callback page, an in-memory session, and connecting to a person's Sanctum wallet. No
 framework is required; it works with Next.js (App Router included), Vite or a plain bundler.
 
-**Status: 0.1.0-alpha.0 release candidate.** This repository contains MIT SDK source and a manually triggered release workflow. Check npm for actual publication status; source availability does not establish hosted-service readiness. Native mobile and WalletConnect/Reown transport are not included. Brand terms and third-party notices remain in effect.
+**Alpha: `0.1.0-alpha.0` (`next` tag).** APIs may change. A configured Sanctum Connect issuer and registered client are required; installing this SDK does not provision a hosted service. Native mobile and WalletConnect/Reown transport are not included.
 
-## Use
+## Install
+
+```sh
+npm install @inverus/connect@next @inverus/connect-react@next
+```
+
+React bindings require React 19. Use ESM imports; CommonJS `require()` is not exported.
+Check the [npm package](https://www.npmjs.com/package/@inverus/connect-react) for available versions.
+
+## Before you start
+
+Obtain a compatible issuer origin and client ID. Register the exact callback and
+post-logout URLs for each environment. Browser apps use public clients with PKCE
+and no secret; confidential-client secrets belong only on your server. All example
+domains are placeholders. Passkeys, social providers and SSO are configured at the
+issuer and completed on its hosted pages, not by these package controls.
+
+## Quick start
+
+This browser-only example uses React state to leave the callback without reloading
+and losing its in-memory session. Mount it at both `/` and `/callback`; configure
+your development server to serve the app at both paths. For Next.js, use the
+[App Router example](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/examples/next-app/README.md) instead of reading `location`
+during a server render.
 
 ```tsx
+import { useState } from "react";
 import { SanctumProvider, SignInButton, SignInCallback, useSession } from "@inverus/connect-react";
 import "@inverus/connect-react/styles.css";
 
-function Root() {
+export function App() {
+  const [callback, setCallback] = useState(() => location.pathname === "/callback");
+  function finish() {
+    history.replaceState(null, "", "/");
+    setCallback(false);
+  }
   return (
-    <SanctumProvider issuer="https://id.example.com" clientId="YOUR_CLIENT_ID" redirectUri="https://app.example.com/callback">
-      {location.pathname === "/callback" ? <SignInCallback onSignedIn={() => history.replaceState(null, "", "/")} /> : <Home />}
+    <SanctumProvider issuer="https://id.example.com" clientId="YOUR_CLIENT_ID"
+      redirectUri="https://app.example.com/callback">
+      {callback ? <SignInCallback onSignedIn={finish} /> : <Home />}
     </SanctumProvider>
   );
 }
@@ -51,8 +81,8 @@ import { SignInDrawerButton } from "@inverus/connect-react";
 <SignInDrawerButton />; // "Continue with Sanctum" → the drawer
 ```
 
-Complete examples: [examples/react-app](../../examples/react-app/README.md) (no framework) and
-[examples/next-app](../../examples/next-app/README.md) (Next.js App Router: the provider in the root layout, the SDK
+Complete examples: [examples/react-app](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/examples/react-app/README.md) (no framework) and
+[examples/next-app](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/examples/next-app/README.md) (Next.js App Router: the provider in the root layout, the SDK
 imported from server components).
 
 ## Events, errors and headless use
@@ -90,9 +120,9 @@ the hooks and reducers the components use: `useSignIn`, `useSignInCallback`, `us
 
 | Where | Support | Evidence |
 | --- | --- | --- |
-| React 19 in Chrome | Supported | `tests/e2e/connect-react.test.ts`, `tests/e2e/connect-react-drawer.test.ts` (axe on every state, keyboard, focus return) |
+| React 19 in Chrome | Supported | Separate private service Chrome suites; not included in this repository |
 | Firefox, Safari | Expected (native `<dialog>`, standard APIs) | Not run here |
-| Server rendering (`react-dom/server`) | Supported: renders inert controls, touches no browser global, sends no request | `tests/unit/sdk-ssr.test.ts`, `tests/unit/connect-react.test.ts`, and the packed tarball on Node 20.20.2, 22.15.1 and 26.13.1 |
+| Server rendering (`react-dom/server`) | Supported: renders inert controls, touches no browser global, sends no request | `tests/unit/sdk-ssr.test.ts`, `tests/unit/connect-react.test.ts`, and the packed tarball on Node 22.15.1 and 26.13.1 |
 | Next.js App Router | Supported: import from server components; the client modules carry `"use client"` | `next build` of examples/next-app (16.4.6) against the packed tarballs |
 | Node for SSR | 22 LTS (≥ 22.15.1) and 26 | As for `@inverus/connect` |
 
@@ -102,22 +132,20 @@ start in effects on the client. The session lives in memory, so a server render 
 A manual screen-reader and 200% zoom pass has not been recorded yet; automated checks (axe) do not establish full
 conformance.
 
-Not included: email or phone codes (Sanctum has no configured delivery for them), WalletConnect relay wallets, and
-native SDKs.
+The available hosted sign-in methods depend on issuer configuration. These React controls do not implement
+email/SMS delivery, WalletConnect relay transport or native SDKs.
 
-## Tested
+## Verification
 
-- `tests/unit/sdk-ssr.test.ts`: every control rendered on the server with browser globals trapped; the event hub.
-- `tests/unit/connect-react.test.ts`: server rendering, the exact mark, the transaction store, single completion, the
-  wallet state machine, theme validation, and the core SDK ending a cancelled proposal.
-- `tests/e2e/connect-react.test.ts` (Chrome): the example app on another origin, in StrictMode, against the local issuer
-  and hosted pages. It covers:
-  - sign-in through the drawer's "Create a Sanctum account", which opens account creation on Sanctum;
-  - one token exchange and nothing left in storage;
-  - a replayed callback refused, and sign-out revoking the tokens;
-  - the typed events (`ready signed_in signed_out`, and one `error:callback` for a replayed callback);
-  - a wallet session: cancel, approve, sign, disconnect.
-- `tests/e2e/connect-react-drawer.test.ts` (Chrome): the drawer with two EIP-6963 wallets. It covers kit-filtered
-  methods, Escape and focus return, search, the chain filter, links, arrow keys and Back focus. Choosing a wallet stores
-  the hint and Sanctum uses that wallet without a picker. On a phone the drawer is a bottom sheet.
-- `tests/unit/connect-wallets.test.ts`: discovery, catalogue search and hint validation (core SDK).
+The public repository checks server rendering, transactions, wallet state, theme
+validation, cancellation and package exports. Packed consumers cover React SSR,
+browser bundles and Next.js prerendering. Issuer-backed Chrome interaction tests
+live in the separate private service repository; they do not certify a hosted service.
+See the repository [verification instructions](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/README.md#compatibility-and-verification).
+
+## License and support
+
+MIT © 2026 inVerus. See [LICENSE](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect-react/LICENSE) and
+[third-party notices](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect-react/THIRD_PARTY_NOTICES.md); the Sanctum brand has separate terms.
+Report ordinary bugs through [GitHub Issues](https://github.com/InVerus-LLC/sanctum-connect-sdk/issues).
+Use the [security policy](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/SECURITY.md) for sensitive reports.

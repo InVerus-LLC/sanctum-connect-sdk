@@ -43,9 +43,10 @@ source, command history, chat or reports. Remove it after successful bootstrap
 and configure trusted publishing for each package. New trusted-publisher
 configurations must be exercised before npm's documented expiry.
 
-No bootstrap credential has been created by this source preparation. npm account
-signup, email verification and CLI authorization are separate from publish
-access and publishing 2FA. Complete required owner authentication on npm itself.
+npm account signup, email verification and CLI authorization are separate from
+publish access and publishing 2FA. A bootstrap token must grant package write
+access and satisfy npm publishing 2FA requirements. Complete credential entry
+on npm and GitHub themselves; never paste a token into chat or documentation.
 
 Do not use npm staged publishing merely to get around first-publish setup: it
 creates a publicly visible placeholder version for a new package. That would be

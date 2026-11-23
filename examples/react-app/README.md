@@ -4,9 +4,10 @@ A small app with no framework: "Continue with Sanctum" opens the sign-in drawer 
 callback page finishes sign-in once, the session lives in memory with Sign out, a Sanctum wallet session asks the person
 to sign "Hello Sanctum", and the SDK's typed events are listed under "Events". It runs in React StrictMode.
 
-## Run it against the local stack
+## Run with a separately configured issuer
 
-1. Start the stack: `npm run dev` (issuer and hosted pages on `http://localhost:4400`).
+1. Start a compatible issuer and hosted pages separately at `http://localhost:4400`.
+   This SDK repository does not include the service or an `npm run dev` command.
 2. In the console (`http://localhost:4400/console`), create a **public** test app with the redirect URI
    `http://127.0.0.1:5174/callback`. In its wallet kit, allow the origin `http://127.0.0.1:5174`, the network
    Base Sepolia (`eip155:84532`) and `personal_sign`.
@@ -25,7 +26,13 @@ Inside this repository `@inverus/connect-react` resolves to the workspace source
 SDK instead (`npm run sdk:pack` writes the tarballs to `.local/sdk-tarballs`; see
 [packages/connect/release/RELEASING.md](../../packages/connect/release/RELEASING.md)).
 
-## Tested
+## Verification scope
+
+References below to `tests/integration` or `tests/e2e` belong to the separate private service
+repository. This public repository verifies packed-consumer types and builds; it does not
+include those issuer-backed tests or establish live provider acceptance.
+
+### Recorded checks
 
 `tests/e2e/connect-react.test.ts` (Chrome) bundles this file and runs it on another origin than the issuer: drawer
 sign-up, one token exchange under StrictMode, nothing left in storage, a replayed callback refused, sign-out revoking

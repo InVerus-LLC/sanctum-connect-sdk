@@ -1,14 +1,31 @@
 # @inverus/connect
 
 The framework-independent TypeScript SDK for apps that sign people in with Sanctum Connect, connect to a person's
-Sanctum wallet, and run agents. React bindings are [`@inverus/connect-react`](../connect-react/README.md); native SDKs
+Sanctum wallet, and run agents. React bindings are [`@inverus/connect-react`](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect-react/README.md); native SDKs
 are not built yet.
 
 Under the hood it is OpenID Connect's authorization code flow with PKCE (S256), `state`, `nonce` and the RFC 9207 `iss`
 response parameter. Protocol work is done by [oauth4webapi](https://github.com/panva/oauth4webapi) 3.8.8 (MIT, by the
 author of `openid-client`). This package adds Sanctum's profile checks and a small API; it doesn't re-implement OAuth.
 
-**Status: 0.1.0-alpha.0 release candidate.** This repository contains MIT SDK source and a manually triggered release workflow. Check npm for actual publication status; source availability does not establish hosted-service readiness. Native mobile and WalletConnect/Reown transport are not included. Brand terms and third-party notices remain in effect.
+**Alpha: `0.1.0-alpha.0` (`next` tag).** APIs may change. A configured Sanctum Connect issuer and registered client are required; installing this SDK does not provision a hosted service. Native mobile and WalletConnect/Reown transport are not included.
+
+## Install
+
+```sh
+npm install @inverus/connect@next
+```
+
+React bindings require React 19. Use ESM imports; CommonJS `require()` is not exported.
+Check the [npm package](https://www.npmjs.com/package/@inverus/connect) for available versions.
+
+## Before you start
+
+Obtain a compatible issuer origin and client ID. Register the exact callback and
+post-logout URLs for each environment. Browser apps use public clients with PKCE
+and no secret; confidential-client secrets belong only on your server. All example
+domains are placeholders. Passkeys, social providers and SSO are configured at the
+issuer and completed on its hosted pages, not by these package controls.
 
 ## Entry points
 
@@ -23,7 +40,12 @@ author of `openid-client`). This package adds Sanctum's profile checks and a sma
 There are no other entry points: internals and source are not exported, and the package is ESM only (`import`, not
 `require`).
 
-## Use
+## Sign-in flow
+
+The following is a flow outline across two requests, not a standalone HTTP handler.
+Save and consume the transaction in your session adapter; `request` is your callback
+request. The [Node example](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/examples/node-server/README.md) supplies the complete wiring.
+
 
 ```ts
 import { SanctumConnect } from "@inverus/connect";
@@ -44,7 +66,10 @@ result.subject; // the pairwise subject Sanctum issues for this app
 
 // Later
 await sanctum.userInfo(result.accessToken, result.subject);
-const next = await sanctum.refresh(result.refreshToken!); // rotated: keep only next.refreshToken
+if (result.refreshToken) {
+  const next = await sanctum.refresh(result.refreshToken);
+  // Store the rotated token atomically; never reuse the old refresh token.
+}
 const signOut = sanctum.signOutUrl({ idTokenHint: result.idToken, postLogoutRedirectUri: "https://app.example.com/" });
 ```
 
@@ -101,7 +126,7 @@ hash, are refused: `raw_bytes_refused`), and `eth_signTypedData_v4` of off-chain
 `typed_domain_invalid`). Sign-In with Ethereum messages are refused (`siwe_origin_unverified` for one bound to the
 session): the origin a session records is the one the app's calls state, which Sanctum shows the person as stated by
 the app (`originVerified: false`), and no browser-bound proof of it exists yet. Sign people in with `SanctumConnect`
-instead. Value moves only through Sanctum Payments.
+instead. This wallet provider does not execute value transfers; payment execution is a separate service contract.
 
 Resume after a reload: `connectSanctumWallet` remembers the session in a `store` (`get`/`set`/`remove`), by default
 `memoryWalletSessionStore()` in this page's memory, so a reload starts over; `resumeSanctumWallet({ transport, store })`
@@ -137,8 +162,8 @@ someone delegates it some.
 | --- | --- | --- |
 | Node 22 LTS (≥ 22.15.1) and Node 26 | Supported (`engines: >=22.15.1`) | The packed tarball is imported and used on 22.15.1 and 26.13.1 (consumer smoke test) |
 | Node 24 | Expected to work | Not run here |
-| Node 20 | Not supported (end of life since April 2026) | The same smoke test passed on 20.20.2 |
-| Chrome (current) | Supported | `tests/e2e/connect-browser.test.ts` runs the SDK on another origin than the issuer |
+| Node 20 | Not supported (end of life since April 2026) | Not in the supported release matrix |
+| Chrome (current) | Supported | Issuer-backed Chrome tests in the separate private service repository |
 | Firefox, Safari | Expected (standard `fetch`, WebCrypto, `URL`) | Not run here |
 | Server rendering, edge/server runtimes | Importing touches no browser global | `tests/unit/sdk-ssr.test.ts` and the consumer smoke test trap `window`, `document`, `navigator`, storage, `location` |
 
@@ -161,17 +186,15 @@ The workspace manifest exports TypeScript source for the monorepo. `npm run sdk:
 `tsc` into `packages/connect/dist` and `packages/connect-react/dist` (ESM `.js`, `.d.ts`, source maps with embedded
 sources) and writes the published manifest from `sanctumPublish`. `npm run sdk:check` (part of `npm run check`) packs
 and checks the tarballs, including a gzip budget per entry point; `npm run sdk:pack` keeps them in
-`.local/sdk-tarballs`. The release checklist is [release/RELEASING.md](release/RELEASING.md).
+`.local/sdk-tarballs`. The release checklist is [release/RELEASING.md](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect/release/RELEASING.md).
 
-## Tested
+## Verification
 
-`tests/integration/connect-sdk.test.ts` (Node, against the local issuer, including a fake issuer whose ID token is
-signed with an unpublished key), `tests/e2e/connect-browser.test.ts` (Chrome, cross-origin),
-`tests/unit/sdk-cancellation.test.ts`, `tests/unit/sdk-wallet-errors.test.ts`, `tests/unit/wallet-session-provider.test.ts`,
-`tests/unit/wallet-session-relay.test.ts`, `tests/integration/wallet-session-conformance.test.ts`, `tests/unit/sdk-ssr.test.ts`,
-`tests/unit/connect-wallets.test.ts`, `tests/unit/connect-agent-registration.test.ts`,
-`tests/unit/sdk-package-rules.test.ts`, and the examples in [examples/](../../examples) (`tests/integration/sdk-examples.test.ts`,
-`tests/integration/agent-claim-example.test.ts`).
+This public repository runs SDK unit tests and isolated packed-consumer checks
+for types, ESM/SSR, browser bundles and Next.js. Private service integration and
+Chrome suites exercise the issuer-backed flows separately; those tests are not
+included here and are not proof of hosted-provider acceptance.
+See the repository [verification instructions](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/README.md#compatibility-and-verification).
 
 ## Verify an exported receipt chain
 
@@ -196,3 +219,10 @@ checkpoint proves the issuer signed that head; it does not prove freshness,
 current authorization, or that an external action occurred. The lower-level
 `verifyReceipts` supports integrity-only inspection when no keys are supplied;
 use `verifySignedReceipts` when accepting evidence from another party.
+
+## License and support
+
+MIT © 2026 inVerus. See [LICENSE](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect/LICENSE) and
+[third-party notices](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect/THIRD_PARTY_NOTICES.md); the Sanctum brand has separate terms.
+Report ordinary bugs through [GitHub Issues](https://github.com/InVerus-LLC/sanctum-connect-sdk/issues).
+Use the [security policy](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/SECURITY.md) for sensitive reports.

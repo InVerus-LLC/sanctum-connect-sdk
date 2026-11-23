@@ -7,7 +7,6 @@ separately with their own license files. Their notices are repeated here for con
 | --- | --- | --- | --- |
 | [oauth4webapi](https://github.com/panva/oauth4webapi) | 3.8.8 | MIT | OAuth 2.0 / OpenID Connect protocol work, DPoP proofs |
 | [uqr](https://github.com/unjs/uqr) | 0.1.3 | MIT | QR code encoding (`@inverus/connect/qr`), a port of Project Nayuki's QR Code generator |
-
 | [jose](https://github.com/panva/jose) | 6.2.17 | MIT | Receipt checkpoint verification (Web Crypto) |
 
 ## jose

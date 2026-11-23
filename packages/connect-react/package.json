@@ -21,7 +21,7 @@
   },
   "sanctumPublish": {
     "version": "0.1.0-alpha.0",
-    "description": "React 19 bindings for @inverus/connect: Continue with Sanctum, the sign-in drawer and wallet picker, the callback page, an in-memory session and Sanctum wallet sessions.",
+    "description": "React 19 hooks and UI for Sanctum Connect: sign-in, callbacks, in-memory sessions, wallet discovery and pairing.",
     "license": "MIT",
     "private": false,
     "engines": {
@@ -52,7 +52,24 @@
       "type": "git",
       "url": "git+https://github.com/InVerus-LLC/sanctum-connect-sdk.git",
       "directory": "packages/connect-react"
-    }
+    },
+    "homepage": "https://github.com/InVerus-LLC/sanctum-connect-sdk/tree/dev/packages/connect-react#readme",
+    "bugs": {
+      "url": "https://github.com/InVerus-LLC/sanctum-connect-sdk/issues"
+    },
+    "author": {
+      "name": "inVerus"
+    },
+    "keywords": [
+      "sanctum",
+      "inverus",
+      "react",
+      "nextjs",
+      "authentication",
+      "openid-connect",
+      "wallet",
+      "sdk"
+    ]
   },
   "license": "MIT"
 }

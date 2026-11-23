@@ -20,7 +20,7 @@
   },
   "sanctumPublish": {
     "version": "0.1.0-alpha.0",
-    "description": "Sign people in with Sanctum Connect (OpenID Connect, PKCE), connect to Sanctum wallets and run agents: the framework-independent TypeScript SDK.",
+    "description": "TypeScript SDK for Sanctum Connect: OpenID Connect sign-in with PKCE, wallet sessions, scoped agent access and signed receipts.",
     "license": "MIT",
     "private": false,
     "engines": {
@@ -63,7 +63,25 @@
       "type": "git",
       "url": "git+https://github.com/InVerus-LLC/sanctum-connect-sdk.git",
       "directory": "packages/connect"
-    }
+    },
+    "homepage": "https://github.com/InVerus-LLC/sanctum-connect-sdk/tree/dev/packages/connect#readme",
+    "bugs": {
+      "url": "https://github.com/InVerus-LLC/sanctum-connect-sdk/issues"
+    },
+    "author": {
+      "name": "inVerus"
+    },
+    "keywords": [
+      "sanctum",
+      "inverus",
+      "authentication",
+      "openid-connect",
+      "oauth2",
+      "pkce",
+      "typescript",
+      "wallet",
+      "agents"
+    ]
   },
   "license": "MIT"
 }
