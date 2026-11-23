@@ -15,7 +15,7 @@ Maintained by **inVerus**. SDK code is **MIT licensed**.
 [React SDK](packages/connect-react/README.md) ·
 [Examples](examples) · [Contributing](CONTRIBUTING.md)
 
-> **Alpha:** `0.1.0-alpha.0`, distributed through npm's `next` tag when published.
+> **Alpha:** `0.1.0-alpha.0` is available on npm through the `next` tag.
 > APIs may change. You need access to a configured Sanctum Connect issuer and a
 > registered client; installing these packages does not provision an identity
 > service. The product website is not an issuer URL.
@@ -37,7 +37,8 @@ npm install @inverus/connect@next @inverus/connect-react@next
 
 Use `pnpm add` or `yarn add` with the same package names if your app uses those
 package managers. Pin a tested alpha version in production-facing applications.
-Check the linked npm pages for publication status.
+See the [release and verification record](RELEASE_VERIFICATION.md) for the exact
+source, registry checks and current distribution-tag status.
 
 ## Configure sign-in
 
