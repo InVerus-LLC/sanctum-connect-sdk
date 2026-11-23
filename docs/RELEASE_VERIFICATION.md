@@ -39,11 +39,20 @@ the owner to grant access. The first manual dispatch returned a workflow-indexin
 404 despite the file being present on the default branch; no run or publication
 was claimed from that failed attempt.
 
-The first manual Linux run45155864424 passed54unit tests, tarball checks and
-Node22/26/Next.js consumers, then failed SBOM generation because the private
-build root lacked a semantic version. The root and lockfile now name0.1.0-alpha.0;
-local CycloneDX generation succeeds with36components. The consumer's Next compiler
+The first manual Linux run 45155864424 passed 54 unit tests, tarball checks and
+Node 22/26/Next.js consumers, then failed SBOM generation because the private
+build root lacked a semantic version. The root and lockfile now name 0.1.0-alpha.0;
+local CycloneDX generation succeeds with 36 components. The consumer's Next compiler
 selection now checks installed platform/ABI packages explicitly and refuses
 missing dependencies, preventing an undefined package path reaching npm pack.
 Two new regression tests passed independently. The corrected full local check
-passed56unit tests and package/type checks. Corrected runner evidence is pending.
+passed 56 unit tests and package/type checks. Corrected runner evidence is pending.
+
+Corrected validation run 45156643486 passed on Linux at 1413bef, including 56 tests,
+Node 22/26 and Next.js consumers, SBOM and tarball uploads. The first publishing
+run 45157284240 then failed before contacting npm: an unprefixed tarball path was
+interpreted as GitHub shorthand. Both registry versions remained 404. The publisher
+now prefixes local tarball paths with ./ and exposes an explicit dry-run mode
+that always forwards npm --dry-run. The workflow runs that exact command before
+publication. Both actual npm dry-runs passed locally; independent review found
+no actual-publication gate bypass. Full local checks passed again.

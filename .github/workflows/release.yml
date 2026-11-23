@@ -56,6 +56,7 @@ jobs:
           npm pack ./packages/connect-react/dist --ignore-scripts --pack-destination release-artifacts
           sha256sum release-artifacts/*.tgz > release-artifacts/SHA256SUMS
           npm sbom --sbom-format cyclonedx > release-artifacts/build-sbom.cdx.json
+          node scripts/publish.ts --dry-run
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: sdk-alpha-${{ github.sha }}
