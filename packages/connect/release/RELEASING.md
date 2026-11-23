@@ -59,6 +59,18 @@ the reviewed public commit and uploaded artifacts. Install exact registry versio
 in a fresh consumer; verify declarations, ESM/SSR and browser imports plus registry
 signatures. Record publication and consumer results separately from local tests.
 
+npm may report an accepted upload before publish-time scanning makes it downloadable.
+Wait for the exact registry version; do not republish to work around a transient 404.
+Check distribution tags after processing: the first alpha publication was assigned
+both `next` and `latest` by the registry despite `--tag next`. The manual
+`alpha-tags.yml` repair is restricted to the two packages at `0.1.0-alpha.0`,
+requires an exact reviewed `dev` SHA, and refuses to remove a different release.
+It changes tag pointers only, never package versions or artifact bytes, and verifies
+the final registry state. Run it without concurrent external tag edits: npm offers
+no atomic compare-and-remove operation, so shared workflow concurrency cannot
+protect against a separate maintainer changing a tag between the read and removal.
+[npm's publish-time scanning notice](https://github.blog/changelog/2026-07-28-npm-publish-time-malware-scanning-and-dual-use-metadata/).
+
 If one package publishes and the other fails, inspect the registry before retrying.
 Do not overwrite or delete a published version. Do not claim that both succeeded.
 A corrective release needs a new coordinated version if the artifact changes.
