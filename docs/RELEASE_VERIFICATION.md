@@ -32,3 +32,9 @@ identifies the reviewed release revision. The manual workflow requires that exac
 SHA before validation or publication. Runner execution, npm authorization,
 provenance attestation and post-publication registry consumers remain separate
 release gates. No automatic workflow triggers are present.
+
+The reviewed initial source was pushed as `83cdedd4e903933baeba52b260e13ebf74cccb21`
+to the public SDK-only repository on dev. Repository creation initially required
+the owner to grant access. The first manual dispatch returned a workflow-indexing
+404 despite the file being present on the default branch; no run or publication
+was claimed from that failed attempt.

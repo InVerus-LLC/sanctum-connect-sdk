@@ -1,3 +1,4 @@
+# Manual only: no push, pull_request, tag or schedule triggers.
 name: Manual SDK alpha release
 on:
   workflow_dispatch:
