@@ -25,6 +25,7 @@ import { build } from "esbuild";
 import { rewriteConsumerSources } from "./consumer-sources.ts";
 import { rewriteModuleSpecifiers } from "./public-names.ts";
 import { createConsumerDirectory } from "./consumer-directory.ts";
+import { nativeCompilerPackage } from "./native-compiler.ts";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const names = new Map(["connect", "connect-react"].map((pkg) => {
@@ -42,9 +43,13 @@ const dir = createConsumerDirectory(directoryArgument, ROOT);
 /** Third-party packages the consumer installs (the SDK's dependencies, React, types, and jose for the agent example). */
 const THIRD_PARTY = ["oauth4webapi", "uqr", "react", "react-dom", "scheduler", "@types/react", "@types/react-dom", "csstype", "@types/node", "undici-types", "jose"];
 /** Next.js and what it needs to build offline (its native compiler for this machine, TypeScript for its type check). */
-const NEXT = ["next", "@next/env", "@swc/helpers", "tslib", "baseline-browser-mapping", "caniuse-lite", "postcss", "nanoid", "picocolors", "source-map-js", "styled-jsx", "client-only", `@next/swc-${process.platform}-${process.arch}`, "typescript"];
+const NEXT = ["next", "@next/env", "@swc/helpers", "tslib", "baseline-browser-mapping", "caniuse-lite", "postcss", "nanoid", "picocolors", "source-map-js", "styled-jsx", "client-only", ...(withNext ? [nativeCompilerPackage(ROOT)] : []), "typescript"];
 /** Where the workspace installed a package Next depends on (Next's own nested copy first). */
-const installedDir = (name: string) => [join(ROOT, "node_modules", "next", "node_modules", name), join(ROOT, "node_modules", name)].find((path) => existsSync(path))!;
+const installedDir = (name: string): string => {
+  const path = [join(ROOT, "node_modules", "next", "node_modules", name), join(ROOT, "node_modules", name)].find((candidate) => existsSync(candidate));
+  if (!path) throw new Error(`Missing installed consumer dependency: ${name}`);
+  return path;
+};
 
 function run(command: string, commandArgs: string[], options: SpawnSyncOptions = {}): string {
   const result = spawnSync(command, commandArgs, { cwd: dir, encoding: "utf8", maxBuffer: 512 * 1024 * 1024, ...options });

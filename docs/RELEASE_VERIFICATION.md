@@ -38,3 +38,12 @@ to the public SDK-only repository on dev. Repository creation initially required
 the owner to grant access. The first manual dispatch returned a workflow-indexing
 404 despite the file being present on the default branch; no run or publication
 was claimed from that failed attempt.
+
+The first manual Linux run45155864424 passed54unit tests, tarball checks and
+Node22/26/Next.js consumers, then failed SBOM generation because the private
+build root lacked a semantic version. The root and lockfile now name0.1.0-alpha.0;
+local CycloneDX generation succeeds with36components. The consumer's Next compiler
+selection now checks installed platform/ABI packages explicitly and refuses
+missing dependencies, preventing an undefined package path reaching npm pack.
+Two new regression tests passed independently. The corrected full local check
+passed56unit tests and package/type checks. Corrected runner evidence is pending.

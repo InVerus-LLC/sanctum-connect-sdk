@@ -279,7 +279,7 @@
     {
       "path": "packages/connect/release/consumer-smoke.ts",
       "sourceSha256": "eee687a3fb910449a9df6120f9d51fbbb422f6afeb84f043eafa6782a842b664",
-      "exportSha256": "eee687a3fb910449a9df6120f9d51fbbb422f6afeb84f043eafa6782a842b664"
+      "exportSha256": "a935e6565126f28983da1e7b16f01ada0505e3de3df02c69758508a0d06a5fad"
     },
     {
       "path": "packages/connect/release/consumer-sources.ts",
