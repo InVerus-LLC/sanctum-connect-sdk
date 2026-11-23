@@ -1,0 +1,69 @@
+{
+  "name": "@inverus/connect",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./wallets": "./src/wallets.ts",
+    "./qr": "./src/qr.ts",
+    "./receipts": "./src/receipts.ts",
+    "./workloads": "./src/workloads.ts"
+  },
+  "dependencies": {
+    "jose": "6.2.17",
+    "oauth4webapi": "3.8.8",
+    "uqr": "0.1.3"
+  },
+  "scripts": {
+    "build": "node release/build-sdk.ts"
+  },
+  "sanctumPublish": {
+    "version": "0.1.0-alpha.0",
+    "description": "Sign people in with Sanctum Connect (OpenID Connect, PKCE), connect to Sanctum wallets and run agents: the framework-independent TypeScript SDK.",
+    "license": "MIT",
+    "private": false,
+    "engines": {
+      "node": ">=22.15.1"
+    },
+    "sideEffects": false,
+    "exports": {
+      ".": {
+        "types": "./esm/index.d.ts",
+        "import": "./esm/index.js"
+      },
+      "./wallets": {
+        "types": "./esm/wallets.d.ts",
+        "import": "./esm/wallets.js"
+      },
+      "./qr": {
+        "types": "./esm/qr.d.ts",
+        "import": "./esm/qr.js"
+      },
+      "./receipts": {
+        "types": "./esm/receipts.d.ts",
+        "import": "./esm/receipts.js"
+      },
+      "./workloads": {
+        "types": "./esm/workloads.d.ts",
+        "import": "./esm/workloads.js"
+      }
+    },
+    "files": [
+      "esm",
+      "CHANGELOG.md",
+      "THIRD_PARTY_NOTICES.md"
+    ],
+    "publishConfig": {
+      "access": "public",
+      "provenance": true
+    },
+    "name": "@inverus/connect",
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/InVerus-LLC/sanctum-connect-sdk.git",
+      "directory": "packages/connect"
+    }
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,490 @@
+{
+  "description": "Explicit SDK-only export from the private source. Hashes record original source and current reviewed export. Release-only root files are original additions tracked by Git. No backend or infrastructure files are included.",
+  "files": [
+    {
+      "path": "assets/brand/sanctum-connect-mark.svg",
+      "sourceSha256": "d0ded86afa052f9031d5e7544f78ed283f7c145b53ef407d512e37c529f07c0d",
+      "exportSha256": "d0ded86afa052f9031d5e7544f78ed283f7c145b53ef407d512e37c529f07c0d"
+    },
+    {
+      "path": "examples/agent-claim/README.md",
+      "sourceSha256": "c74bd2a270515002f916bd794bca93f0fd5a4b15734d59ebe1fb7b12d821c1cd",
+      "exportSha256": "061989489a26b2230fe796ac28daffa376a3c8928d48681cc0ed05a8a489e35a"
+    },
+    {
+      "path": "examples/agent-claim/src/agent.ts",
+      "sourceSha256": "e0f0c210142b04509e2e2bda4c2c408013f5c5d9e213ba2ebbb226abd80913d3",
+      "exportSha256": "dfbe15be7a94fa44a5dc3fdc23a205f95ea456dfbed1783b82efe08369d07491"
+    },
+    {
+      "path": "examples/browser-ts/README.md",
+      "sourceSha256": "999f1a436dce01fb54994e6200ddfa5bbacaece3700c8cf2af13a556bfbedb45",
+      "exportSha256": "03bff936e6dcfd87b2e7f671f474e679303dbb34f1e0f3e3f14da39a618f385b"
+    },
+    {
+      "path": "examples/browser-ts/index.html",
+      "sourceSha256": "9e27421579cf0f8841d460ba5820da369aff13c5932d85566dbab93a9a284ef1",
+      "exportSha256": "9e27421579cf0f8841d460ba5820da369aff13c5932d85566dbab93a9a284ef1"
+    },
+    {
+      "path": "examples/browser-ts/src/main.tsx",
+      "sourceSha256": "1bfcda3baee211ecc3a1776053a08a6ceb21b6bed4a71a20f17636af768206fe",
+      "exportSha256": "8c5d1c6503ad81cd93210557a15ea8ddf9669960cda65a1139ec0a3d53d9df4d"
+    },
+    {
+      "path": "examples/browser-ts/src/project-methods.tsx",
+      "sourceSha256": "e35afb77bc63771ec1df7469f6f7c4ffa482ac1cdf94a6559fd1ed526e1a06b4",
+      "exportSha256": "e09a94459d452dbf23b8457b13d1543fa2db77747520a66f3c728f8880f8a607"
+    },
+    {
+      "path": "examples/browser-ts/src/session.tsx",
+      "sourceSha256": "473960a231d8ca6e8152794e7ed0bb801b3ae2aa02bfd2c4c053c8c645ad2cb4",
+      "exportSha256": "a2baa432e39b36bd71a984af7bf04ab2dc877bcfb6f705d5c01c9a44d2f6bc3a"
+    },
+    {
+      "path": "examples/next-app/README.md",
+      "sourceSha256": "eb8f0106ca56a9b329a65ac768c837bf25b4f3785e49dc5c17281e835c0f2ee0",
+      "exportSha256": "d2989e24dfa657fa496f301a1a1b6946f8930716f02bf4dead59ab9412e70ea6"
+    },
+    {
+      "path": "examples/next-app/app/account.tsx",
+      "sourceSha256": "710dfbacb83200b20c340459bb3e60e0bebe9747ce25bbb4a76c9bc3f5675dc2",
+      "exportSha256": "b3164b7b25081b9ef67fdfdc8276f7caeee84962f3c095c93998faac5f7c636d"
+    },
+    {
+      "path": "examples/next-app/app/callback/finish.tsx",
+      "sourceSha256": "78067d78e65671db31379d59e13c60a29996eaf871149661ece4f210fe94f334",
+      "exportSha256": "2c4fae38f7bad817297e051b440e2c2ceb874dff616080d97260d09e6e81b1d7"
+    },
+    {
+      "path": "examples/next-app/app/callback/page.tsx",
+      "sourceSha256": "bf1b1925fc932a54e9cafb25392d5f990b104da2d2e49d3d9d9ca0a1970d4114",
+      "exportSha256": "bf1b1925fc932a54e9cafb25392d5f990b104da2d2e49d3d9d9ca0a1970d4114"
+    },
+    {
+      "path": "examples/next-app/app/layout.tsx",
+      "sourceSha256": "899d7ac1284faa1c752f89f1cc6ef498599211b70d84ab109980d49be5acda35",
+      "exportSha256": "086c7e59f70f506c86c1d5aa0277c9cb238757e482b94dd7e0a468bd53af323c"
+    },
+    {
+      "path": "examples/next-app/app/page.tsx",
+      "sourceSha256": "e602f516c26e49c337044ef2849c271130cdebf46f189d47f84271a4f0d8f612",
+      "exportSha256": "0d0d2b90f1516323385ac1fbfcc8f3368d3725501cd5ed66867f2a7e0a526b69"
+    },
+    {
+      "path": "examples/next-app/next.config.mjs",
+      "sourceSha256": "6d501a9567505e89b5253110314e859cdbec4ac11b63a1793ad5aeea5f0758a5",
+      "exportSha256": "4e7b6264c8878fdb463744123d12c5dfb10da16cd156330ad2b14a6a0669b001"
+    },
+    {
+      "path": "examples/next-app/tsconfig.json",
+      "sourceSha256": "8e59223afe3a7742d3f6c8324ea545051e3c00c90cbebdbc90eb269bbca29819",
+      "exportSha256": "8e59223afe3a7742d3f6c8324ea545051e3c00c90cbebdbc90eb269bbca29819"
+    },
+    {
+      "path": "examples/node-server/README.md",
+      "sourceSha256": "fe165e717055937e399a9056d7546e5cc14f658171ec7a33b0eb3ad7a8455cc1",
+      "exportSha256": "615a0fd5823791c22ea134a8aff4cb3951514d3988dc7d0158b595ba919a9cde"
+    },
+    {
+      "path": "examples/node-server/src/server.ts",
+      "sourceSha256": "e50e8a4ee919f7eeb78b7cc82e5513a5e184508e7ed21107b2466a94984ab1c5",
+      "exportSha256": "f9212c59072e4281af94efc7159c236ac620ce9d96840c0c271f3e11abaa10e5"
+    },
+    {
+      "path": "examples/react-app/README.md",
+      "sourceSha256": "986590b79ea14ac29f3c0e04a34d7f396f213dfd093a799de697acee618adf76",
+      "exportSha256": "6d339926f3ca2871d65648d16faad34f16bb6a2e9863538bcc9bfd2abae738cb"
+    },
+    {
+      "path": "examples/react-app/index.html",
+      "sourceSha256": "e9b1253560cb03045c4c5f6c9e8fa9ecd0bf1cf9d081ecf4adda99c70b91354f",
+      "exportSha256": "e9b1253560cb03045c4c5f6c9e8fa9ecd0bf1cf9d081ecf4adda99c70b91354f"
+    },
+    {
+      "path": "examples/react-app/src/app.tsx",
+      "sourceSha256": "269b765b5c0b66ddcf38bce8339ae1357a5625bc2ffa29ea37bab51718f49a7e",
+      "exportSha256": "58db1ebc644a63ce611f9e246f017f0376b0701699731cc61aa32b6bbd792b59"
+    },
+    {
+      "path": "packages/connect-react/CHANGELOG.md",
+      "sourceSha256": "fdcf2ad2ca563eeca475cd26be4884e42c1bbb0f0b073981b5219f6fa5845f0f",
+      "exportSha256": "90abb754a44edad107c3793cc9941bd8fa9af0aee56d4821693a42973a0cb596"
+    },
+    {
+      "path": "packages/connect-react/LICENSE",
+      "sourceSha256": "426aed5c49d69341bada7f283d2a9ebcea7b1ad2a5c61f38a92232821c6535d3",
+      "exportSha256": "426aed5c49d69341bada7f283d2a9ebcea7b1ad2a5c61f38a92232821c6535d3"
+    },
+    {
+      "path": "packages/connect-react/README.md",
+      "sourceSha256": "aaf0c29d37098653a4170de2fd72cadb303b184bc81197c4090e9a3ed443dd10",
+      "exportSha256": "df54d1d3c5448a4c72768151ffbc4c5f95947b7852ec90a22f396b0dd45821a3"
+    },
+    {
+      "path": "packages/connect-react/THIRD_PARTY_NOTICES.md",
+      "sourceSha256": "644a1f77b66d37110a56a5bd302173c9af13152b663255def5cc9b917cd93e7b",
+      "exportSha256": "644a1f77b66d37110a56a5bd302173c9af13152b663255def5cc9b917cd93e7b"
+    },
+    {
+      "path": "packages/connect-react/package.json",
+      "sourceSha256": "ebeb3bc057d8b73efed16b08073ecef9bea0e76885af501504507ce5f5f6fb3a",
+      "exportSha256": "30e05bb79abd0d638fdc62629502cabc738c8074a248e5985f464d8ad09b03b0"
+    },
+    {
+      "path": "packages/connect-react/src/callback.ts",
+      "sourceSha256": "eebf90e3bf525547d9bdfbfcbaf72ae055f5676652e4788ccab40b5f1e49fbf5",
+      "exportSha256": "eebf90e3bf525547d9bdfbfcbaf72ae055f5676652e4788ccab40b5f1e49fbf5"
+    },
+    {
+      "path": "packages/connect-react/src/drawer-brand.ts",
+      "sourceSha256": "5178f0c1b81630b4b0e97597e9847dab976709a903803b034629639f2cd6ceee",
+      "exportSha256": "5178f0c1b81630b4b0e97597e9847dab976709a903803b034629639f2cd6ceee"
+    },
+    {
+      "path": "packages/connect-react/src/drawer-state.ts",
+      "sourceSha256": "8cb2d514c2b98833c981c57105f136423bf3796b5c33fd83b63780770bd277ce",
+      "exportSha256": "a37fe07d31220bfac2c9de2e0784a1d9668eb19ff37390a87a39726720b5e958"
+    },
+    {
+      "path": "packages/connect-react/src/drawer-views.ts",
+      "sourceSha256": "3b43dd52e9b7476f45dfa9ad74443d23dda73bbe03404a9dc1b20654f275119c",
+      "exportSha256": "7e538de5166d3e017bbf970a7b441239bcc9df857ddc651ad609ec35c39df584"
+    },
+    {
+      "path": "packages/connect-react/src/errors.ts",
+      "sourceSha256": "f1ffcf12465873432a86e197493da9367b53fa9aed92a3b7e2206e3fd839f436",
+      "exportSha256": "6585c49dc4c89668235f475da503815bfc1628674b13627f8d0eb877f3ebcb5a"
+    },
+    {
+      "path": "packages/connect-react/src/events.ts",
+      "sourceSha256": "d36bf791eb3c65eee4a3398d7d8824314a8b30c1a26904ca9117341a7a73e7b5",
+      "exportSha256": "5fa06318b3e5ba18037f522cb0e587aa9274b7deeb5033c406d21f0c9db59384"
+    },
+    {
+      "path": "packages/connect-react/src/index.ts",
+      "sourceSha256": "7ef1313cb8764e02591756c92bcc344c3354eb4245b5afe6fc686d7b40a96233",
+      "exportSha256": "229bd288a378a045e63b4708dd0332becd3673a4a7cdc7a1e593040516777c88"
+    },
+    {
+      "path": "packages/connect-react/src/mark-path.ts",
+      "sourceSha256": "1466aeef8e3f5e02a2c210873dd512b4678ee1882a1589f1ccd83a6f917ab031",
+      "exportSha256": "1466aeef8e3f5e02a2c210873dd512b4678ee1882a1589f1ccd83a6f917ab031"
+    },
+    {
+      "path": "packages/connect-react/src/mark.ts",
+      "sourceSha256": "ebc36b354720c32e7e60a011231ae25599100d5beca6ae6ca976dd35993b86f9",
+      "exportSha256": "ebc36b354720c32e7e60a011231ae25599100d5beca6ae6ca976dd35993b86f9"
+    },
+    {
+      "path": "packages/connect-react/src/provider.ts",
+      "sourceSha256": "36eb5b2ce8ed01a60836c3bb6312fc55b27a077fb4c6dbe47d9e68fdcd3d0e2d",
+      "exportSha256": "e93bc9bd95d3cc2f04363a68e65d04375b3271550ed059d2f24485af3d38dced"
+    },
+    {
+      "path": "packages/connect-react/src/qr-code.ts",
+      "sourceSha256": "f9ff5c8c40d17f8cd8ce5e67d3871f228dada43a083d6bbfb32aa5fc919b8e05",
+      "exportSha256": "2520eaab0f3ed68c3c2b3578ab93d37cf2726a8d3e6d4acb88831eefe39e79cb"
+    },
+    {
+      "path": "packages/connect-react/src/sign-in-drawer.ts",
+      "sourceSha256": "63ee0ee1e815694d590c5643cc7405f79be7b05f1602b3b554e66470aa4eca8b",
+      "exportSha256": "6969cabe8a05cbcab646ec8053a9f7c98f4c851c25e5525c2d01b87f2e786985"
+    },
+    {
+      "path": "packages/connect-react/src/sign-in-kit.ts",
+      "sourceSha256": "2c1b76aea9bb5e5214a6ecd0cc73180ef6b72227d2f29492dae1211b83f43ab2",
+      "exportSha256": "2c1b76aea9bb5e5214a6ecd0cc73180ef6b72227d2f29492dae1211b83f43ab2"
+    },
+    {
+      "path": "packages/connect-react/src/sign-in.ts",
+      "sourceSha256": "e0780adf80f01c9da2f0e0614b284d8b4f848085aa2552caa1e3cd52b9c6824d",
+      "exportSha256": "e0780adf80f01c9da2f0e0614b284d8b4f848085aa2552caa1e3cd52b9c6824d"
+    },
+    {
+      "path": "packages/connect-react/src/styles.css",
+      "sourceSha256": "81af230f1a7b3016480fb0f562ca1af71a2a9b9c8e2ee744e2af150e8605cdfc",
+      "exportSha256": "81af230f1a7b3016480fb0f562ca1af71a2a9b9c8e2ee744e2af150e8605cdfc"
+    },
+    {
+      "path": "packages/connect-react/src/theme.ts",
+      "sourceSha256": "82ee71241f86d45c81f32eb74230da551f70621c03815ed93ccb3115a7abe2d3",
+      "exportSha256": "82ee71241f86d45c81f32eb74230da551f70621c03815ed93ccb3115a7abe2d3"
+    },
+    {
+      "path": "packages/connect-react/src/transactions.ts",
+      "sourceSha256": "fe1b17e74ff3c46c5d4940322fd6f3665256ef3d46e4fc66a005c30917e42815",
+      "exportSha256": "21e1f1c1becf4d0de6280bc90cb278de61e2b7e8c577a969eda8a23caa74a5ab"
+    },
+    {
+      "path": "packages/connect-react/src/use-injected-wallets.ts",
+      "sourceSha256": "1c5bfdc4f86cd7d80f7572809eb908cb7160dd37703b45537c3ffdb9872dac82",
+      "exportSha256": "ab7b758fa8a0f67962b4d078946b25d9a693697e732f8f6a71d26ae05aebc0f4"
+    },
+    {
+      "path": "packages/connect-react/src/wallet-connect.ts",
+      "sourceSha256": "e0dbd40c24e7688fc6984760ecf60156159c0d337e06fdf3e4634c44f35b9ad0",
+      "exportSha256": "e0dbd40c24e7688fc6984760ecf60156159c0d337e06fdf3e4634c44f35b9ad0"
+    },
+    {
+      "path": "packages/connect-react/src/wallet.ts",
+      "sourceSha256": "874725ead8dbc3ee592288cdd53d4203d56e1b349abd03ac4ef67d6da239a4b4",
+      "exportSha256": "18eb309a73e1800d1236aad509d1f3454a9c000c7c19bec5821c6b637817e104"
+    },
+    {
+      "path": "packages/connect-react/tsconfig.build.json",
+      "sourceSha256": "c286239c474a6bfa4815062580bc80a12781ce8d591ab242ff50fac51567ccab",
+      "exportSha256": "c286239c474a6bfa4815062580bc80a12781ce8d591ab242ff50fac51567ccab"
+    },
+    {
+      "path": "packages/connect/CHANGELOG.md",
+      "sourceSha256": "6be6f6a90a7d73751203e76cd0cd164f058e782a00f1f31c836466d3269f26c5",
+      "exportSha256": "bf04f002a43d41754f990cef3e70fde0f6b051692058504044db101d473ecb6f"
+    },
+    {
+      "path": "packages/connect/LICENSE",
+      "sourceSha256": "426aed5c49d69341bada7f283d2a9ebcea7b1ad2a5c61f38a92232821c6535d3",
+      "exportSha256": "426aed5c49d69341bada7f283d2a9ebcea7b1ad2a5c61f38a92232821c6535d3"
+    },
+    {
+      "path": "packages/connect/README.md",
+      "sourceSha256": "9ab88b84a66058eef8a18c882f53f1276d1c798be7a3e8383d125a84c58eb824",
+      "exportSha256": "c9e6173f6531e0777f97464b9e92d0b61826fab7e2ec04dcb3287c2f5b234e92"
+    },
+    {
+      "path": "packages/connect/THIRD_PARTY_NOTICES.md",
+      "sourceSha256": "33d7fca4c18ed6f635f54a7e1fd7bb016b091d8c74c0f19e3aa29d48404ffb86",
+      "exportSha256": "33d7fca4c18ed6f635f54a7e1fd7bb016b091d8c74c0f19e3aa29d48404ffb86"
+    },
+    {
+      "path": "packages/connect/package.json",
+      "sourceSha256": "e6f03b5f545bd61e2b9ccb08f91e90771e34dc7f6f9918bd5e315199815b460d",
+      "exportSha256": "2409636ac8d0652a20ce62aa25540aaeb8291aa3da6a1d42188e7a13ea59f303"
+    },
+    {
+      "path": "packages/connect/release/RELEASING.md",
+      "sourceSha256": "4f4aaa17b1dd509ff7ef9198d40d4e7902046933bffb7bf416bdebd3490cd1ee",
+      "exportSha256": "b7c65d56d698fcd82e4479355f7ed846296a62501bc32314a25adcb73e396f1c"
+    },
+    {
+      "path": "packages/connect/release/build-sdk.ts",
+      "sourceSha256": "dba64e06be7299045602871ed184be6b9f0eec264ecd482d013c0e6333f4a297",
+      "exportSha256": "8a8080648864159df7979750da0b44fd256622260a4653cac126c0d418dda3b5"
+    },
+    {
+      "path": "packages/connect/release/consumer-directory.ts",
+      "sourceSha256": "855cfcfdb0224c6e3ec8e344a29d8687f759ea23982dae3e6752140528ab58b9",
+      "exportSha256": "855cfcfdb0224c6e3ec8e344a29d8687f759ea23982dae3e6752140528ab58b9"
+    },
+    {
+      "path": "packages/connect/release/consumer-smoke.ts",
+      "sourceSha256": "eee687a3fb910449a9df6120f9d51fbbb422f6afeb84f043eafa6782a842b664",
+      "exportSha256": "eee687a3fb910449a9df6120f9d51fbbb422f6afeb84f043eafa6782a842b664"
+    },
+    {
+      "path": "packages/connect/release/consumer-sources.ts",
+      "sourceSha256": "e5073b96a1d7e7f1c85db5f0a65c65415c6d09c71036171f21a053011b91c2cd",
+      "exportSha256": "e5073b96a1d7e7f1c85db5f0a65c65415c6d09c71036171f21a053011b91c2cd"
+    },
+    {
+      "path": "packages/connect/release/consumer/check.tsx",
+      "sourceSha256": "2c967ae1e8402bdc70b63f56d6d7bdab1ac02d9b21fa2307191ff0668cbf3641",
+      "exportSha256": "5a8e61433363f569de20eddd51d03e123452d9108d80fa6e1f4fa7d1f4dc1e56"
+    },
+    {
+      "path": "packages/connect/release/consumer/node-check.ts",
+      "sourceSha256": "84c3312832be9542953662b169c97fc90bf93e06972ca346bc9c0bb468291519",
+      "exportSha256": "809e5c5c644d3b9c8db83b4ee06d598efbf5af0d8a2aeb6e40742335d30a1060"
+    },
+    {
+      "path": "packages/connect/release/consumer/smoke.mjs",
+      "sourceSha256": "99e5efcd700787fadfae4aa8c1f3cd5375822f378dbb4daae9de425123bbaadc",
+      "exportSha256": "99e5efcd700787fadfae4aa8c1f3cd5375822f378dbb4daae9de425123bbaadc"
+    },
+    {
+      "path": "packages/connect/release/consumer/tsconfig.json",
+      "sourceSha256": "319ea7f01deb57b8f553361ca56e3fcb468f0cdc7bf0a1a5b3816b5c2e6cc84c",
+      "exportSha256": "319ea7f01deb57b8f553361ca56e3fcb468f0cdc7bf0a1a5b3816b5c2e6cc84c"
+    },
+    {
+      "path": "packages/connect/release/consumer/tsconfig.node.json",
+      "sourceSha256": "6b3aeb531cc720b170910951087ffe2f53882aedf5c79da721298d1741c1caef",
+      "exportSha256": "6b3aeb531cc720b170910951087ffe2f53882aedf5c79da721298d1741c1caef"
+    },
+    {
+      "path": "packages/connect/release/package-rules.ts",
+      "sourceSha256": "43bfdf4a9d298722c330a382b11bdca7e51bf25f79b7a2940611e6eac99f0d19",
+      "exportSha256": "43bfdf4a9d298722c330a382b11bdca7e51bf25f79b7a2940611e6eac99f0d19"
+    },
+    {
+      "path": "packages/connect/release/public-names.ts",
+      "sourceSha256": "3839d995761d176ad21cb6cd8e5cfa524ceb84faa5d4c63213546ca9c37fb3f2",
+      "exportSha256": "3839d995761d176ad21cb6cd8e5cfa524ceb84faa5d4c63213546ca9c37fb3f2"
+    },
+    {
+      "path": "packages/connect/release/tarball.ts",
+      "sourceSha256": "9991f0aa8c3f1a7d6ecae62b6b162f1c75db01fb2f6ecc857745e4970f3f3907",
+      "exportSha256": "9991f0aa8c3f1a7d6ecae62b6b162f1c75db01fb2f6ecc857745e4970f3f3907"
+    },
+    {
+      "path": "packages/connect/src/agent-payments.ts",
+      "sourceSha256": "ce1dbcc79664d490e9d09c0ef3d775b388aa2ebda13a3663b3e1643a08090c65",
+      "exportSha256": "ce1dbcc79664d490e9d09c0ef3d775b388aa2ebda13a3663b3e1643a08090c65"
+    },
+    {
+      "path": "packages/connect/src/agent-registration.ts",
+      "sourceSha256": "ef35a4278038ee93165c8ff60ec9e9ffbfd7d14448b47382ecb57d333031489f",
+      "exportSha256": "ef35a4278038ee93165c8ff60ec9e9ffbfd7d14448b47382ecb57d333031489f"
+    },
+    {
+      "path": "packages/connect/src/agent-tokens.ts",
+      "sourceSha256": "571ef6c9b8e216d402a78b4bab3134b41ab5b4cc26234cf88494d5b02a7b1081",
+      "exportSha256": "571ef6c9b8e216d402a78b4bab3134b41ab5b4cc26234cf88494d5b02a7b1081"
+    },
+    {
+      "path": "packages/connect/src/errors.ts",
+      "sourceSha256": "a98a84807478cd118ada4d4809d75a54d8aa3db46da134de10b755a8125ae4b5",
+      "exportSha256": "a98a84807478cd118ada4d4809d75a54d8aa3db46da134de10b755a8125ae4b5"
+    },
+    {
+      "path": "packages/connect/src/index.ts",
+      "sourceSha256": "ffe59fc17022fb84f1bb836695bc5327d1766da43f3ff61c89fa4737abde5565",
+      "exportSha256": "1ebd523f2133f12d5503d60640c1017a612def6dc11afeb117dd0600031c943f"
+    },
+    {
+      "path": "packages/connect/src/qr.ts",
+      "sourceSha256": "772da57f189b05e3d09fe5b3dfdac259f8d15d3e9bcbf1670c1b1c18fdea25f3",
+      "exportSha256": "aaee7dc6da3653e6970366be2c6bfccbef2c4fb5d084468679c56147b570dab6"
+    },
+    {
+      "path": "packages/connect/src/receipt-chain.ts",
+      "sourceSha256": "891099d06aff8ba1834bbd62e6ab12e41d22a17cc9cf89c530bbbfd65db7fac4",
+      "exportSha256": "891099d06aff8ba1834bbd62e6ab12e41d22a17cc9cf89c530bbbfd65db7fac4"
+    },
+    {
+      "path": "packages/connect/src/receipts.ts",
+      "sourceSha256": "86b4d89877baba036b01b85a0cb985282b5e5e37686413cd8d708e136105577a",
+      "exportSha256": "86b4d89877baba036b01b85a0cb985282b5e5e37686413cd8d708e136105577a"
+    },
+    {
+      "path": "packages/connect/src/wallet-session-connect.ts",
+      "sourceSha256": "49e3277b90bce62b908ce754384996e90e57ebe0a68f15f59f7712454b01e6d2",
+      "exportSha256": "49e3277b90bce62b908ce754384996e90e57ebe0a68f15f59f7712454b01e6d2"
+    },
+    {
+      "path": "packages/connect/src/wallet-session-provider.ts",
+      "sourceSha256": "c905a50dd2f3c1ba1619395cf7213f5d8bd548c38a9339348b0729f84c0da282",
+      "exportSha256": "c905a50dd2f3c1ba1619395cf7213f5d8bd548c38a9339348b0729f84c0da282"
+    },
+    {
+      "path": "packages/connect/src/wallet-session-store.ts",
+      "sourceSha256": "483538abea6c5b14f7aec353b118dace853720b8abd202519247c9052d3029dd",
+      "exportSha256": "483538abea6c5b14f7aec353b118dace853720b8abd202519247c9052d3029dd"
+    },
+    {
+      "path": "packages/connect/src/wallet-session.ts",
+      "sourceSha256": "121ede63bb50e9896b229fac9e1d04f31e3cd2fa89e29a62d2eff6910424a470",
+      "exportSha256": "121ede63bb50e9896b229fac9e1d04f31e3cd2fa89e29a62d2eff6910424a470"
+    },
+    {
+      "path": "packages/connect/src/wallets.ts",
+      "sourceSha256": "ceea1d974907292c0822cbb8b70019811ce80e390caf368bc2bba8613fe5c88b",
+      "exportSha256": "fa37692f6764d13e7e5b153e273129a4e164ae0920dbf1efcb4eb129be3f115f"
+    },
+    {
+      "path": "packages/connect/src/workloads.ts",
+      "sourceSha256": "d152dcb4981b0d0de1f1d2d7bf364dc549fd5190944c23b81e2be18559e3279d",
+      "exportSha256": "d152dcb4981b0d0de1f1d2d7bf364dc549fd5190944c23b81e2be18559e3279d"
+    },
+    {
+      "path": "packages/connect/tsconfig.build.json",
+      "sourceSha256": "b8420d29ddc5d7bed0d1b26aa88acab99ce0c8e0b27faa0d76445bdfea4fb9d3",
+      "exportSha256": "b8420d29ddc5d7bed0d1b26aa88acab99ce0c8e0b27faa0d76445bdfea4fb9d3"
+    },
+    {
+      "path": "scripts/check-sdk-packages.ts",
+      "sourceSha256": "9369bfc59bcb339b89f271d818b53451b35cf15cff66c0b436f715a7e536e6aa",
+      "exportSha256": "9369bfc59bcb339b89f271d818b53451b35cf15cff66c0b436f715a7e536e6aa"
+    },
+    {
+      "path": "tests/support/qr-decode.ts",
+      "sourceSha256": "6fe303c9212e99d771397cf8d6df590a1c901b7b942edb98bd57fd422df2d737",
+      "exportSha256": "6fe303c9212e99d771397cf8d6df590a1c901b7b942edb98bd57fd422df2d737"
+    },
+    {
+      "path": "tests/unit/connect-agent-registration.test.ts",
+      "sourceSha256": "f408f81b99f4fe0d3afe3c2ce88a98e163dce336fea3becb3eec5da74dfdeb8d",
+      "exportSha256": "f408f81b99f4fe0d3afe3c2ce88a98e163dce336fea3becb3eec5da74dfdeb8d"
+    },
+    {
+      "path": "tests/unit/connect-qr.test.ts",
+      "sourceSha256": "0108862b2798e2454b498c5afb94db25bcfeff49f041404840b3a404859d8865",
+      "exportSha256": "0108862b2798e2454b498c5afb94db25bcfeff49f041404840b3a404859d8865"
+    },
+    {
+      "path": "tests/unit/connect-react-branding.test.ts",
+      "sourceSha256": "0a9b1c8255dc9199ebb820ab8909c54e2a96704727adbbe1b33dd42ac564f86f",
+      "exportSha256": "0a9b1c8255dc9199ebb820ab8909c54e2a96704727adbbe1b33dd42ac564f86f"
+    },
+    {
+      "path": "tests/unit/connect-react-wallet-session.test.ts",
+      "sourceSha256": "b8502e08db427cbfe822c961cf30956546db9569691294c29d05c4e683c20c2a",
+      "exportSha256": "40bd86783685d3fc1c0c0de85d53a2831f60ab962f39606f9309f9a2d9dd7081"
+    },
+    {
+      "path": "tests/unit/connect-react.test.ts",
+      "sourceSha256": "3fd1700ce625233a52197e70115b259d207070fa3b00664b3de0758b511689a3",
+      "exportSha256": "1a45b91595bc69db4090091f16891f4596dff96522b9f76976fc2825d040b43a"
+    },
+    {
+      "path": "tests/unit/connect-wallets.test.ts",
+      "sourceSha256": "08be2671574d5af95151f7f5fc07536334fbf243788c52896c5413d575772149",
+      "exportSha256": "08be2671574d5af95151f7f5fc07536334fbf243788c52896c5413d575772149"
+    },
+    {
+      "path": "tests/unit/sdk-cancellation.test.ts",
+      "sourceSha256": "92f5592896a53974a9c379ce7edc7371624976c1f077f8ec21d0dfbaeefcce29",
+      "exportSha256": "92f5592896a53974a9c379ce7edc7371624976c1f077f8ec21d0dfbaeefcce29"
+    },
+    {
+      "path": "tests/unit/sdk-consumer-directory.test.ts",
+      "sourceSha256": "0c1402ec3717b0169e709dbfa786b52390e880f8ced81a50ef6bbb2eb0d84c86",
+      "exportSha256": "0c1402ec3717b0169e709dbfa786b52390e880f8ced81a50ef6bbb2eb0d84c86"
+    },
+    {
+      "path": "tests/unit/sdk-package-rules.test.ts",
+      "sourceSha256": "d1c760ef71d56096d841a640e186619c0d3589ba9b6e16d2c28c4d380d2296db",
+      "exportSha256": "d1c760ef71d56096d841a640e186619c0d3589ba9b6e16d2c28c4d380d2296db"
+    },
+    {
+      "path": "tests/unit/sdk-public-names.test.ts",
+      "sourceSha256": "0a84dc2807c0705f95b82435b3fecb09085b4cbb6f58fc19f071073f8b1a9a17",
+      "exportSha256": "0a84dc2807c0705f95b82435b3fecb09085b4cbb6f58fc19f071073f8b1a9a17"
+    },
+    {
+      "path": "tests/unit/sdk-receipts.test.ts",
+      "sourceSha256": "c3475c25f3d372e4aa9e93bc7c54ff2dcb7f61428be1e32d04f4048548488509",
+      "exportSha256": "372de4d637222519a2e8858ef9dcfe786372246823a90e5266ca83c0f9d92ac8"
+    },
+    {
+      "path": "tests/unit/sdk-sign-in-cancellation.test.ts",
+      "sourceSha256": "74be7ff2e3c47d33ded9054e012f04260c4c77947cdaaf4d0274b80626b3f871",
+      "exportSha256": "74be7ff2e3c47d33ded9054e012f04260c4c77947cdaaf4d0274b80626b3f871"
+    },
+    {
+      "path": "tests/unit/sdk-ssr.test.ts",
+      "sourceSha256": "d6796ba17321eb9e8a9883e4bc75c3b0e51cf581bdd499efe7d9e72841e58e14",
+      "exportSha256": "5d46c30f60ec9c77d1779574c536e613bac7bcc5b1e033e8e362bac8e7a018d3"
+    },
+    {
+      "path": "tests/unit/sdk-wallet-errors.test.ts",
+      "sourceSha256": "355c89f1db9f9cfc7ce89f6b478b48a3d23ef4d467e2433028e1cf77ac69d20c",
+      "exportSha256": "355c89f1db9f9cfc7ce89f6b478b48a3d23ef4d467e2433028e1cf77ac69d20c"
+    },
+    {
+      "path": "tests/unit/sdk-workloads.test.ts",
+      "sourceSha256": "0efe67c14a7b13b789a9fc814763ecc3dce1b643e04fc7c94ffb48ee806b4e31",
+      "exportSha256": "0efe67c14a7b13b789a9fc814763ecc3dce1b643e04fc7c94ffb48ee806b4e31"
+    }
+  ]
+}

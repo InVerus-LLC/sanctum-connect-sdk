@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sanctum Connect: plain TypeScript example</title>
+</head>
+<body>
+  <!-- Set data-client-id to your test app's client ID (see README.md); the redirect URI must match exactly. -->
+  <main id="app" data-issuer="http://localhost:4400" data-client-id="REPLACE_WITH_YOUR_CLIENT_ID" data-redirect-uri="http://127.0.0.1:5173/">
+    <h1>Plain TypeScript example</h1>
+    <p id="status" role="status">Loading…</p>
+    <div id="methods"></div>
+    <div id="account" hidden>
+      <p id="subject"></p>
+      <button type="button" id="sign-out">Sign out</button>
+    </div>
+  </main>
+  <script type="module" src="/out/main.js"></script>
+</body>
+</html>

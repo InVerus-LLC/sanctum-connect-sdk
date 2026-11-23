@@ -1,0 +1,67 @@
+name: Manual SDK alpha release
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Full reviewed commit SHA (must match the selected branch)
+        required: true
+        type: string
+      publish:
+        description: Publish both alpha packages to npm next with provenance
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: sdk-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.repository == 'InVerus-LLC/sanctum-connect-sdk' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Verify reviewed revision
+        env:
+          REVIEWED_REVISION: ${{ inputs.revision }}
+        run: |
+          test "$REVIEWED_REVISION" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22.15.1
+      - name: Remember consumer runtime
+        run: echo "CONSUMER_NODE=$(command -v node)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+      - run: npm ci --ignore-scripts --no-fund
+      - run: npm run check
+      - name: Verify packed consumers
+        run: npm run consumer -- "$RUNNER_TEMP/sdk-consumer" --deps-from-workspace --next --node "$CONSUMER_NODE"
+      - name: Prepare exact release artifacts
+        run: |
+          npm run build
+          mkdir release-artifacts
+          npm pack ./packages/connect/dist --ignore-scripts --pack-destination release-artifacts
+          npm pack ./packages/connect-react/dist --ignore-scripts --pack-destination release-artifacts
+          sha256sum release-artifacts/*.tgz > release-artifacts/SHA256SUMS
+          npm sbom --sbom-format cyclonedx > release-artifacts/build-sbom.cdx.json
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: sdk-alpha-${{ github.sha }}
+          path: release-artifacts/
+          if-no-files-found: error
+      - name: Publish reviewed alpha tarballs
+        if: inputs.publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+        run: node scripts/publish.ts

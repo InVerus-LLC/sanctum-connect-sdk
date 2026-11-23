@@ -1,0 +1,58 @@
+{
+  "name": "@inverus/connect-react",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "dependencies": {
+    "@inverus/connect": "0.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0"
+  },
+  "scripts": {
+    "build": "node ../connect/release/build-sdk.ts"
+  },
+  "sanctumPublish": {
+    "version": "0.1.0-alpha.0",
+    "description": "React 19 bindings for @inverus/connect: Continue with Sanctum, the sign-in drawer and wallet picker, the callback page, an in-memory session and Sanctum wallet sessions.",
+    "license": "MIT",
+    "private": false,
+    "engines": {
+      "node": ">=22.15.1"
+    },
+    "sideEffects": [
+      "*.css"
+    ],
+    "exports": {
+      ".": {
+        "types": "./esm/index.d.ts",
+        "import": "./esm/index.js"
+      },
+      "./styles.css": "./styles.css"
+    },
+    "files": [
+      "esm",
+      "styles.css",
+      "CHANGELOG.md",
+      "THIRD_PARTY_NOTICES.md"
+    ],
+    "publishConfig": {
+      "access": "public",
+      "provenance": true
+    },
+    "name": "@inverus/connect-react",
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/InVerus-LLC/sanctum-connect-sdk.git",
+      "directory": "packages/connect-react"
+    }
+  },
+  "license": "MIT"
+}

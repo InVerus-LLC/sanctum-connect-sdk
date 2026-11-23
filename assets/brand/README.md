@@ -1,0 +1,1 @@
+The Sanctum mark is included for the SDK rendering regression and authorized sign-in controls. Brand terms in ../../packages/connect-react/THIRD_PARTY_NOTICES.md apply; MIT does not grant trademark rights.

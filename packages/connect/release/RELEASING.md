@@ -1,0 +1,68 @@
+# Manual SDK releases
+
+The owner authorized public MIT SDK source in
+`InVerus-LLC/sanctum-connect-sdk` and alpha publication under `@inverus`.
+No push, PR, tag or schedule triggers a workflow. The only trigger is
+`workflow_dispatch`, and the workflow only accepts the `dev` branch in this repo.
+This SDK policy does not promote the private service or deploy infrastructure.
+
+## Candidate
+
+Both `sanctumPublish.version` fields are `0.1.0-alpha.0`. Workspace manifests are
+private source packages; only built manifests are publishable. The generated
+repository URL matches this public repository, with package directories.
+Keep generated packages on the `next` tag. Never move an alpha to `latest`.
+
+## Verify and review
+
+1. Install the pinned Node 26.13.1 toolchain and run `npm ci --ignore-scripts`.
+2. Run `npm run check`. Strict typechecks, unit tests and packed package checks
+   must pass. No skipped or weakened security assertions.
+3. Run `npm run consumer -- <new outside-directory> --deps-from-workspace --next
+   --node <Node-22.15.1-executable>`. It installs packed SDKs outside the checkout,
+   checks declarations, browser bundles, ESM/SSR and Next.js prerendering.
+4. Independently review source, license notices, export boundaries and workflow.
+   Record the exact reviewed commit SHA before dispatch.
+5. Manually run the workflow with that full SHA and `publish=false` to verify
+   the runner and inspect the uploaded tarballs, checksums and build SBOM.
+6. Set up npm release authentication, then explicitly dispatch the same reviewed
+   revision with `publish=true`. The workflow publishes those checked tarballs
+   with `--provenance --access public --tag next`.
+
+## npm authentication and first publication
+
+The workflow requires GitHub OIDC provenance. A local login alone does not make
+local publication eligible. Do not disable provenance to bypass this gate.
+
+Prefer npm trusted publishing bound to this exact public repository and
+`release.yml`. npm currently configures trusted publishers through package
+settings, so a new package may require a bootstrap credential. If needed, the
+owner supplies a short-lived, narrowly scoped npm publish credential through
+GitHub's encrypted `NPM_BOOTSTRAP_TOKEN` repository secret. Never put its value in
+source, command history, chat or reports. Remove it after successful bootstrap
+and configure trusted publishing for each package. New trusted-publisher
+configurations must be exercised before npm's documented expiry.
+
+No bootstrap credential has been created by this source preparation. npm account
+signup, email verification and CLI authorization are separate from publish
+access and publishing 2FA. Complete required owner authentication on npm itself.
+
+Do not use npm staged publishing merely to get around first-publish setup: it
+creates a publicly visible placeholder version for a new package. That would be
+a separate release path, not evidence of the requested provenance alpha release.
+
+## Post-publication
+
+Check both exact versions, `next` tags, registry integrity and provenance against
+the reviewed public commit and uploaded artifacts. Install exact registry versions
+in a fresh consumer; verify declarations, ESM/SSR and browser imports plus registry
+signatures. Record publication and consumer results separately from local tests.
+
+If one package publishes and the other fails, inspect the registry before retrying.
+Do not overwrite or delete a published version. Do not claim that both succeeded.
+A corrective release needs a new coordinated version if the artifact changes.
+
+Official references (reviewed 23 November 2026):
+[npm provenance](https://docs.npmjs.com/generating-provenance-statements/),
+[trusted publishing](https://docs.npmjs.com/trusted-publishers/),
+[staged publishing](https://docs.npmjs.com/staged-publishing/).
