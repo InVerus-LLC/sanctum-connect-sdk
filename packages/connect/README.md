@@ -94,8 +94,8 @@ Errors are `SanctumConnectError` with a stable `code`:
 | `expired` | An agent registration expired or was used |
 | `aborted` | The caller's own `AbortSignal` fired |
 
-An abort after the code exchange left may still have redeemed the code: start a new sign-in. `waitForClaim` reports
-its own cancellation as `access_denied` ("Cancelled"), as before; that will move to `aborted` with its test.
+An abort after the code exchange left may still have redeemed the code: start a new sign-in.
+Cancelling `waitForClaim` rejects with `aborted`; an owner refusal uses `access_denied`.
 
 Wallet sessions (`connectSanctumWallet`, `resumeSanctumWallet`, `SanctumWalletProvider`, `sanctumTransport`) are
 EIP-1193 providers. Their errors are `ProviderRpcError` with typed codes (`PROVIDER_ERRORS`), Sanctum's `reason` and
@@ -134,10 +134,9 @@ returns the provider while the session is active and forgets it otherwise. The s
 A store over sessionStorage or localStorage lets the session survive reloads, but any script that can read that
 store can use the session until it ends (at most 7 days), only to ask for signatures the person approves on Sanctum.
 
-The transport is a port (`WalletSessionTransport`, with an optional `cancel`; `transportError` maps HTTP-style
-failures); another relay can implement it without changing apps. `tests/unit/wallet-session-relay.test.ts` runs the
-same conformance suite against an in-process fake relay as `tests/integration/wallet-session-conformance.test.ts`
-runs against Sanctum.
+The transport is a port (`WalletSessionTransport`, with an optional `cancel`).
+`transportError` maps HTTP-style failures. A custom transport must preserve the
+session approval, cancellation and error contract.
 
 ## Agents
 
@@ -163,7 +162,7 @@ someone delegates it some.
 | Node 22 LTS (≥ 22.15.1) and Node 26 | Supported (`engines: >=22.15.1`) | The packed tarball is imported and used on 22.15.1 and 26.13.1 (consumer smoke test) |
 | Node 24 | Expected to work | Not run here |
 | Node 20 | Not supported (end of life since April 2026) | Not in the supported release matrix |
-| Chrome (current) | Supported | Issuer-backed Chrome tests in the separate private service repository |
+| Chrome | Browser integration target | Standard Fetch, Web Crypto and URL APIs; issuer required for sign-in |
 | Firefox, Safari | Expected (standard `fetch`, WebCrypto, `URL`) | Not run here |
 | Server rendering, edge/server runtimes | Importing touches no browser global | `tests/unit/sdk-ssr.test.ts` and the consumer smoke test trap `window`, `document`, `navigator`, storage, `location` |
 
@@ -188,13 +187,12 @@ sources) and writes the published manifest from `sanctumPublish`. `npm run sdk:c
 and checks the tarballs, including a gzip budget per entry point; `npm run sdk:pack` keeps them in
 `.local/sdk-tarballs`. The release checklist is [release/RELEASING.md](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect/release/RELEASING.md).
 
-## Verification
+## Development
 
-This public repository runs SDK unit tests and isolated packed-consumer checks
-for types, ESM/SSR, browser bundles and Next.js. Private service integration and
-Chrome suites exercise the issuer-backed flows separately; those tests are not
-included here and are not proof of hosted-provider acceptance.
-See the repository [verification instructions](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/README.md#compatibility-and-verification).
+The public repository includes SDK unit tests and isolated consumer checks for
+TypeScript declarations, ESM/SSR, browser bundles and Next.js. Live sign-in still
+requires a configured issuer and registered client.
+See the [contributor guide](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/CONTRIBUTING.md) for verification commands.
 
 ## Verify an exported receipt chain
 
@@ -225,4 +223,4 @@ use `verifySignedReceipts` when accepting evidence from another party.
 MIT © 2026 inVerus. See [LICENSE](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect/LICENSE) and
 [third-party notices](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect/THIRD_PARTY_NOTICES.md); the Sanctum brand has separate terms.
 Report ordinary bugs through [GitHub Issues](https://github.com/InVerus-LLC/sanctum-connect-sdk/issues).
-Use the [security policy](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/SECURITY.md) for sensitive reports.
+For sensitive vulnerability reports, email **bobir@inverus.tech** privately. Never include credentials or customer data.

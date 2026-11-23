@@ -1,39 +1,92 @@
-# Node server example (`@inverus/connect`, confidential client)
+# Node.js server authentication example
 
-A server-side web app on plain `node:http`: the client secret stays on the server, the sign-in transaction waits in the
-server's session (an opaque `HttpOnly`, `SameSite=Lax` cookie), and tokens are never sent to the browser, logged or
-rendered. Routes: `/login`, `/callback` (finished once), `/me` (userinfo for the signed-in subject), `POST /refresh`
-(refresh-token rotation), `POST /logout` (revokes both tokens, then Sanctum's RP-initiated logout). POSTs must come from
-the example's own origin. Every call to Sanctum carries a 10-second `AbortSignal`.
+A confidential OpenID Connect client built with `node:http` and
+`@inverus/connect`. Sign-in transactions and tokens stay on the server behind an
+opaque `HttpOnly`, `SameSite=Lax` session cookie.
 
-## Run with a separately configured issuer
+## Prerequisites
 
-1. Start a compatible Sanctum Connect issuer separately. These instructions assume a development issuer
-   at `http://localhost:4400`; this SDK repository does not contain the service or an `npm run dev` command.
-2. In the console, create a **confidential** test app with the redirect URI `http://127.0.0.1:4430/callback` and the
-   post-logout redirect URI `http://127.0.0.1:4430/`. Keep the secret it shows you out of source control.
-3. Supply `SANCTUM_CLIENT_SECRET` through your local secret manager or protected
-   process environment; do not put its value in shell history. Then run:
+Use Node.js **26.13.1** to run this repository's TypeScript examples. You also need
+a separately running Sanctum Connect issuer and permission to register a test client.
+The SDK repository does not include the issuer or hosted sign-in service.
 
-   ```sh
-   SANCTUM_ISSUER=http://localhost:4400 SANCTUM_CLIENT_ID=YOUR_CLIENT_ID \
-   SANCTUM_ALLOW_LOOPBACK=1 PORT=4430 node examples/node-server/src/server.ts
-   ```
+From a terminal:
 
-4. Open `http://127.0.0.1:4430/`.
+```sh
+git clone https://github.com/InVerus-LLC/sanctum-connect-sdk.git
+cd sanctum-connect-sdk
+npm ci --ignore-scripts
+```
 
-Sessions are in memory: restarting the process signs everyone out. A production app would keep sessions in its own
-store and serve over https.
+If you already cloned the repository, use that checkout. Run the commands below
+from the **repository root**, not from this example's directory.
 
-## Verification scope
+## Configure
 
-References below to `tests/integration` or `tests/e2e` belong to the separate private service
-repository. This public repository verifies packed-consumer types and builds; it does not
-include those issuer-backed tests or establish live provider acceptance.
+Register a **confidential** client:
 
-### Recorded checks
+| Setting | Value |
+| --- | --- |
+| Redirect URI | `http://127.0.0.1:4430/callback` |
+| Post-logout redirect URI | `http://127.0.0.1:4430/` |
 
-`tests/integration/sdk-examples.test.ts` starts the local issuer, registers this example as a confidential client,
-spawns this file and signs a person in through it: userinfo, refresh rotation, a replayed callback refused, a
-cross-origin POST refused, sign-out, and no token or secret in its output. The consumer smoke test type-checks it
-against the packed tarballs.
+Create `.local/node-server.env` locally. The `.local/` directory is ignored by Git.
+Supply the real client ID and secret through your editor or secret manager, not
+through a command saved in shell history.
+
+```dotenv
+SANCTUM_ISSUER=http://localhost:4400
+SANCTUM_CLIENT_ID=YOUR_CLIENT_ID
+SANCTUM_CLIENT_SECRET=YOUR_CLIENT_SECRET
+SANCTUM_ALLOW_LOOPBACK=1
+PORT=4430
+```
+
+The server derives its callback from `http://127.0.0.1:${PORT}`. If you change the
+port, update both registered URLs. The secret is required and remains server-side.
+
+## Run
+
+```sh
+node --env-file=.local/node-server.env examples/node-server/src/server.ts
+```
+
+After discovery succeeds, the terminal prints `Listening on http://127.0.0.1:4430`.
+Open that URL. Ctrl+C stops the server.
+
+## Try the flow
+
+1. Select **Sign in with Sanctum** and complete hosted authentication.
+2. Visit `/me` to read the authenticated subject through UserInfo.
+3. Select **Refresh** to exercise refresh-token rotation, when a refresh token
+   has been issued to this client.
+4. Select **Sign out** to revoke tokens and end the issuer session.
+
+| Route | Purpose |
+| --- | --- |
+| `GET /login` | Begin sign-in and save the transaction server-side |
+| `GET /callback` | Consume the transaction and validate the response |
+| `GET /me` | Fetch UserInfo for the signed-in subject |
+| `POST /refresh` | Rotate the refresh token |
+| `POST /logout` | Revoke tokens and redirect to issuer logout |
+
+## Application boundaries
+
+This is a local development example. Sessions are an in-memory map with no
+production expiry or capacity policy; restarting signs everyone out. The server
+binds to loopback HTTP, and its cookie deliberately lacks `Secure` for that local
+setup. A deployed application needs HTTPS, secure cookies, bounded durable
+sessions and its own lifecycle and request controls. Do not expose this example
+server directly to the internet.
+
+See [server.ts](src/server.ts) for the full implementation and the
+[TypeScript SDK guide](../../packages/connect/README.md) for API details.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Process exits before listening | All required variables exist and issuer discovery succeeds. |
+| Callback rejected | Register the exact loopback host and port used by the server. |
+| Refresh returns `signed_out` | The client needs a valid refresh token; sign in again if it expired. |
+| A POST returns `cross_origin` | Use the page's own forms from `127.0.0.1`, not another origin. |

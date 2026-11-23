@@ -1,48 +1,85 @@
-# Plain TypeScript browser example (`@inverus/connect`, headless)
+# Browser TypeScript authentication example
 
-A browser app with no framework and no UI package: it shows the sign-in methods its **App project** allows, starts
-sign-in with the chosen method as a hint, finishes the callback on its own page and signs out (both tokens revoked,
-then Sanctum's RP-initiated logout). It is a public client: PKCE and no secret; the transaction waits in this tab's
-`sessionStorage` and is taken once; tokens stay in memory, so a reload signs the app out.
+A framework-free browser application using `@inverus/connect`. It displays the
+project's available sign-in methods, starts an OpenID Connect flow with PKCE,
+handles the callback and signs the person out.
 
-| File | What it shows |
+## Prerequisites
+
+Use Node.js **26.13.1** to run this repository's TypeScript examples. You also need
+a separately running Sanctum Connect issuer and permission to register a test client.
+The SDK repository does not include the issuer or hosted sign-in service.
+
+From a terminal:
+
+```sh
+git clone https://github.com/InVerus-LLC/sanctum-connect-sdk.git
+cd sanctum-connect-sdk
+npm ci --ignore-scripts
+```
+
+If you already cloned the repository, use that checkout. Run the commands below
+from the **repository root**, not from this example's directory.
+
+## Configure
+
+Register a **public** client with these URLs:
+
+| Setting | Value |
 | --- | --- |
-| [src/project-methods.tsx](src/project-methods.tsx) | The app's kit document, which Sanctum computes from the app's wallet kit **within its project's enforced sign-in policy** |
-| [src/session.tsx](src/session.tsx) | `startSignIn` with a hint, `finishSignIn` once with an AbortSignal, revocation and `signOutUrl` |
-| [src/main.tsx](src/main.tsx) | Wiring with `textContent` only (no HTML injection) |
+| Redirect URI | `http://127.0.0.1:5173/` |
+| Post-logout redirect URI | `http://127.0.0.1:5173/` |
+| Application origin | `http://127.0.0.1:5173` |
 
-The files are `.tsx` without JSX only so that the repository's Node-typed root TypeScript project leaves this DOM code
-to the DOM-typed SDK project (`packages/connect-react/tsconfig.json` type-checks it).
+Bind the client to an enabled App project with at least one sign-in method.
+In [index.html](index.html), update the attributes on `#app`:
 
-## Run with a separately configured issuer
+| Attribute | Set it to |
+| --- | --- |
+| `data-issuer` | Your issuer origin; local default `http://localhost:4400` |
+| `data-client-id` | The registered public client ID |
+| `data-redirect-uri` | The exact redirect URI above |
 
-1. Start a compatible Sanctum Connect issuer separately. These instructions assume a development issuer
-   at `http://localhost:4400`; this SDK repository does not contain the service or an `npm run dev` command.
-2. In the console (`http://localhost:4400/console`), create a **public** test app with the redirect URI
-   `http://127.0.0.1:5173/` (exactly, with the slash) and the post-logout redirect URI `http://127.0.0.1:5173/`.
-3. Projects: under Projects, create an **App** project, choose its sign-in methods (for example passkeys and Ethereum
-   wallets only) and bind the test app to it. The page then offers only those methods. A method outside the policy is
-   refused by Sanctum itself (`403 sign_in_method_not_allowed`), whatever this page shows; a disabled or archived
-   project's app gets a 404 kit and can't sign anyone in.
-4. Put the client ID into `data-client-id` in [index.html](index.html), then serve:
+No client secret is needed. The source enables insecure HTTP only for loopback
+development; remote issuer URLs must use HTTPS.
 
-   ```sh
-   npx esbuild examples/browser-ts/src/main.tsx --bundle --format=esm --outdir=examples/browser-ts/out \
-     --servedir=examples/browser-ts --serve=127.0.0.1:5173
-   ```
+## Run
 
-5. Open `http://127.0.0.1:5173/`.
+```sh
+npm exec -- esbuild examples/browser-ts/src/main.tsx --bundle --format=esm \
+  --outdir=examples/browser-ts/out --servedir=examples/browser-ts \
+  --serve=127.0.0.1:5173
+```
 
-`allowInsecureLoopback: true` only permits `http://` for a `localhost`/`127.0.0.1` issuer; an `https` issuer ignores it.
+Open [http://127.0.0.1:5173/](http://127.0.0.1:5173/). Keep the terminal open;
+press Ctrl+C to stop. Restart the command after editing source files.
 
-## Verification scope
+## Try the flow
 
-References below to `tests/integration` or `tests/e2e` belong to the separate private service
-repository. This public repository verifies packed-consumer types and builds; it does not
-include those issuer-backed tests or establish live provider acceptance.
+1. Choose an available sign-in method.
+2. Complete authentication on the issuer's hosted page.
+3. Return to the example and check that the signed-in subject appears.
+4. Select **Sign out** to revoke the tokens and end the issuer session.
 
-### Recorded checks
+The PKCE transaction waits in this tab's `sessionStorage` and is consumed once.
+Tokens stay in memory; reloading the app starts a new client session.
 
-The consumer smoke test type-checks and bundles these files against the packed SDK tarballs (browser platform, no
-Node built-ins). There is no Chrome run of this page yet; the same SDK calls run in Chrome in
-`tests/e2e/connect-browser.test.ts`.
+## Code guide
+
+- [main.tsx](src/main.tsx): page setup and sign-in method controls.
+- [session.tsx](src/session.tsx): transaction storage, callback and logout.
+- [project-methods.tsx](src/project-methods.tsx): the project's public sign-in kit.
+
+The `.tsx` files contain ordinary TypeScript without JSX. They are checked with
+the browser compiler configuration used by the SDK consumer suite.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Discovery fails | The issuer is running and its origin matches `data-issuer`. |
+| No sign-in methods | The client is bound to an enabled App project with allowed methods. |
+| Callback is rejected | The registered URI includes the same host, port and trailing slash. |
+| Transaction is missing | Start sign-in again in the same tab; do not replay a callback URL. |
+
+See the [TypeScript SDK guide](../../packages/connect/README.md) for error codes.

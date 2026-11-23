@@ -38,4 +38,4 @@ without the owner's explicit release instruction.
 
 Contributions are covered by this repository's MIT license; preserve third-party
 notices and the separate brand terms. Use GitHub Issues for reproducible bugs and
-[SECURITY.md](SECURITY.md) for sensitive vulnerability reports.
+email bobir@inverus.tech privately for sensitive vulnerability reports.

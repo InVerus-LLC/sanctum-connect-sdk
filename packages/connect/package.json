@@ -80,7 +80,11 @@
       "pkce",
       "typescript",
       "wallet",
-      "agents"
+      "agents",
+      "javascript",
+      "nodejs",
+      "oidc",
+      "sdk"
     ]
   },
   "license": "MIT"

@@ -7,7 +7,7 @@ UI, credentials or customer data into it.
 - Preserve MIT licenses, third-party notices and separate brand terms.
 - Use Node 26.13.1, npm workspaces and exact locked dependencies.
 - Source, tests and handwritten configuration stay at or below 299 lines.
-  Lockfiles and generated source-export inventories are excluded with provenance.
+  Generated lockfiles are excluded from the authored-file limit.
 - Separate SDK responsibilities; no duplicate identity or authorization authority.
 - Sign-in, consent, delegation, wallet signing and spending stay separate.
 - Add meaningful regression tests for behavior changes and independently review

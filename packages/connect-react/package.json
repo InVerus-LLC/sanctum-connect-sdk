@@ -68,7 +68,9 @@
       "authentication",
       "openid-connect",
       "wallet",
-      "sdk"
+      "sdk",
+      "oidc",
+      "sign-in"
     ]
   },
   "license": "MIT"

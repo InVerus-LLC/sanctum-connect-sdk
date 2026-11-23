@@ -101,7 +101,7 @@ typed `ProviderRpcError` codes. `describeError(error)` returns a plain sentence 
 the hooks and reducers the components use: `useSignIn`, `useSignInCallback`, `useSession`, `useWalletSession` +
 `walletReducer`, `useSignInKit` + `useInjectedWallets` + `drawerReducer`, `qrPath`, `themeCss`.
 
-## What it does, and doesn't
+## Components and session behavior
 
 | Piece | Behaviour |
 | --- | --- |
@@ -110,8 +110,8 @@ the hooks and reducers the components use: `useSignIn`, `useSignInCallback`, `us
 | `SignInCallback`, `useSignInCallback` | Finishes the sign-in once per `state` in a page (StrictMode's double effects share one token exchange), removes `code` and `state` from the address bar and history, and fails truthfully for a reloaded, replayed or other-tab callback (`transaction_missing`). |
 | `useSession` | The session lives in memory only: no token is ever written to storage, a URL or a message, so a reload signs the app out. `refresh()` keeps only the newest (rotated) refresh token; `signOut()` revokes both tokens, and `{ endSanctumSession: true }` also ends the Sanctum session (RP-initiated logout). Apps that need longer sessions should use a server-side (confidential) integration with `@inverus/connect`. |
 | `useWalletSession`, `SanctumWalletConnect` | Each connection attempt has a number; a late pairing link or approval for an older attempt is ignored, and a late approval is ended. Cancel, Disconnect and unmount end the proposed or connected session. The pairing link is a one-time capability: it's kept only while waiting and never rendered as text. Requests go through `wallet.request` (EIP-1193 `personal_sign`, `eth_signTypedData_v4`); the person approves each one in Sanctum. |
-| `SignInDrawerButton`, `SanctumSignInDrawer` | The embedded sign-in chooser, structured after the Skiper 21 reference and implemented independently (no Skiper source). It is a native `<dialog>`: modal, Escape or the backdrop closes it, and focus returns to the opener. On phones it is a bottom sheet, and motion is off under reduced-motion settings. It reads the app's public wallet kit, so it offers only methods Sanctum will accept for this app. The person's choice travels as a sign-in hint (`sanctum_method`, plus `sanctum_wallet` for a browser wallet), and Sanctum's page opens that way. Every proof (passkey, wallet signature, SSO) still happens on Sanctum's own origin. |
-| Wallet picker (in the drawer) | Lists Ethereum wallets this browser announces through EIP-6963. Their names and icons are untrusted: icons are drawn only as data-URI `<img>`, and the reverse-DNS id is just a hint. It also lists catalogue wallets: Ethereum ones link to their reviewed home pages because they can't sign in until installed, and Bitcoin ones sign a BIP-322 message on Sanctum. Search ignores case and accents and matches aliases; there is a chain filter, Clear, empty results and arrow-key movement. There is no inflated wallet count. |
+| `SignInDrawerButton`, `SanctumSignInDrawer` | The embedded sign-in chooser. It is a native `<dialog>`: modal, Escape or the backdrop closes it, and focus returns to the opener. On phones it is a bottom sheet, and motion is off under reduced-motion settings. It reads the app's public wallet kit, so it offers only methods Sanctum will accept for this app. The person's choice travels as a sign-in hint (`sanctum_method`, plus `sanctum_wallet` for a browser wallet), and Sanctum's page opens that way. Every proof (passkey, wallet signature, SSO) still happens on Sanctum's own origin. |
+| Wallet picker (in the drawer) | Lists Ethereum wallets this browser announces through EIP-6963. Their names and icons are untrusted: icons are drawn only as data-URI `<img>`, and the reverse-DNS id is just a hint. It also lists catalogue wallets: Ethereum ones link to their reviewed home pages because they can't sign in until installed, and Bitcoin ones sign a BIP-322 message on Sanctum. Search ignores case and accents and matches aliases; there is a chain filter, Clear, empty results and arrow-key movement.  |
 | `SanctumQrCode` | A QR code drawn as one SVG path, dark on light, with no injected HTML (encoder: uqr 0.1.3 through `@inverus/connect/qr`). The wallet controls use it for the pairing link and say when the link stops working. |
 | `SanctumMark` | The exact Sanctum Connect mark (checked against `assets/brand/sanctum-connect-mark.svg`). |
 | `themeCss` | Typed theme tokens to CSS custom properties for your own stylesheet: no inline styles or injected `<style>`, so a strict Content Security Policy works. Values that could inject CSS are refused. |
@@ -120,7 +120,7 @@ the hooks and reducers the components use: `useSignIn`, `useSignInCallback`, `us
 
 | Where | Support | Evidence |
 | --- | --- | --- |
-| React 19 in Chrome | Supported | Separate private service Chrome suites; not included in this repository |
+| React 19 in Chrome | Browser integration target | Standard browser APIs; issuer required for sign-in |
 | Firefox, Safari | Expected (native `<dialog>`, standard APIs) | Not run here |
 | Server rendering (`react-dom/server`) | Supported: renders inert controls, touches no browser global, sends no request | `tests/unit/sdk-ssr.test.ts`, `tests/unit/connect-react.test.ts`, and the packed tarball on Node 22.15.1 and 26.13.1 |
 | Next.js App Router | Supported: import from server components; the client modules carry `"use client"` | `next build` of examples/next-app (16.4.6) against the packed tarballs |
@@ -135,17 +135,16 @@ conformance.
 The available hosted sign-in methods depend on issuer configuration. These React controls do not implement
 email/SMS delivery, WalletConnect relay transport or native SDKs.
 
-## Verification
+## Development
 
-The public repository checks server rendering, transactions, wallet state, theme
-validation, cancellation and package exports. Packed consumers cover React SSR,
-browser bundles and Next.js prerendering. Issuer-backed Chrome interaction tests
-live in the separate private service repository; they do not certify a hosted service.
-See the repository [verification instructions](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/README.md#compatibility-and-verification).
+The repository checks server rendering, transactions, wallet state, theme validation,
+cancellation and package exports. Packed consumers cover React SSR, browser bundles
+and Next.js prerendering. Live sign-in requires your configured issuer.
+See the [contributor guide](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/CONTRIBUTING.md) for verification commands.
 
 ## License and support
 
 MIT © 2026 inVerus. See [LICENSE](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect-react/LICENSE) and
 [third-party notices](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect-react/THIRD_PARTY_NOTICES.md); the Sanctum brand has separate terms.
 Report ordinary bugs through [GitHub Issues](https://github.com/InVerus-LLC/sanctum-connect-sdk/issues).
-Use the [security policy](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/SECURITY.md) for sensitive reports.
+For sensitive vulnerability reports, email **bobir@inverus.tech** privately. Never include credentials or customer data.
