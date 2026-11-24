@@ -18,15 +18,23 @@ and ready-made sign-in components.
 
 ```sh
 # TypeScript, JavaScript or Node.js
-npm install @inverus/connect@next
+npm install @sanctum.ai/connect@next
 
 # React 19 or Next.js
-npm install @inverus/connect@next @inverus/connect-react@next
+npm install @sanctum.ai/connect@next @sanctum.ai/connect-react@next
 ```
 
 The same packages work with `pnpm add` and `yarn add`. Both are ESM packages with
 TypeScript declarations. The SDKs are currently **alpha**; pin a tested version
 and review the changelog before upgrading.
+
+## Migrating from @inverus
+
+Use `@sanctum.ai/connect` and `@sanctum.ai/connect-react` for new installations.
+For an existing integration, replace both dependency names and every matching import,
+including `/wallets`, `/qr`, `/receipts`, `/workloads` and `/styles.css` subpaths.
+Keep the two SDK versions aligned. The issuer and registered callback configuration
+stay the same. Older `@inverus` packages are separate, immutable npm releases.
 
 ## Getting started
 
@@ -44,7 +52,7 @@ Each application and environment can have its own callback URLs. The issuer is
 the authentication service's HTTPS origin, not the product website.
 
 ```ts
-import { SanctumConnect } from "@inverus/connect";
+import { SanctumConnect } from "@sanctum.ai/connect";
 
 const connect = await SanctumConnect.discover({
   issuer: "https://id.example.com",
@@ -63,19 +71,19 @@ for `SanctumProvider`, sign-in controls and callback routing.
 
 ## Packages
 
-| Package | What it provides |
-| --- | --- |
-| [@inverus/connect](https://www.npmjs.com/package/@inverus/connect) | OIDC/PKCE, token lifecycle, wallet sessions and agent access |
-| [@inverus/connect-react](https://www.npmjs.com/package/@inverus/connect-react) | React provider, hooks, sign-in drawer, callback and wallet components |
+| Package                                                                              | What it provides                                                      |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| [@sanctum.ai/connect](https://www.npmjs.com/package/@sanctum.ai/connect)             | OIDC/PKCE, token lifecycle, wallet sessions and agent access          |
+| [@sanctum.ai/connect-react](https://www.npmjs.com/package/@sanctum.ai/connect-react) | React provider, hooks, sign-in drawer, callback and wallet components |
 
 Optional core entry points keep specialized features separate:
 
-| Import | Purpose |
-| --- | --- |
-| `@inverus/connect/wallets` | EIP-6963 wallet discovery and search |
-| `@inverus/connect/qr` | QR encoding for pairing and agent claims |
-| `@inverus/connect/workloads` | Tokens for configured workload trusts |
-| `@inverus/connect/receipts` | Signed receipt verification with trusted issuer keys |
+| Import                          | Purpose                                              |
+| ------------------------------- | ---------------------------------------------------- |
+| `@sanctum.ai/connect/wallets`   | EIP-6963 wallet discovery and search                 |
+| `@sanctum.ai/connect/qr`        | QR encoding for pairing and agent claims             |
+| `@sanctum.ai/connect/workloads` | Tokens for configured workload trusts                |
+| `@sanctum.ai/connect/receipts`  | Signed receipt verification with trusted issuer keys |
 
 Authentication, resource consent, agent delegation and wallet signing are separate
 permissions. Connecting a wallet does not authorize payments. Native mobile SDKs
@@ -86,12 +94,12 @@ and WalletConnect/Reown transport are not included in this alpha.
 Every example includes configuration, commands, expected behavior and troubleshooting.
 Start with the [examples guide](examples/README.md).
 
-| Example | Integration |
-| --- | --- |
-| [Browser TypeScript](examples/browser-ts/README.md) | Framework-free sign-in with PKCE and tab-scoped transactions |
-| [React](examples/react-app/README.md) | Sign-in drawer, hooks, session events and wallet pairing |
-| [Next.js App Router](examples/next-app/README.md) | Shared provider, callback route and server rendering |
-| [Node.js server](examples/node-server/README.md) | Confidential client with server-held tokens |
+| Example                                                | Integration                                                        |
+| ------------------------------------------------------ | ------------------------------------------------------------------ |
+| [Browser TypeScript](examples/browser-ts/README.md)    | Framework-free sign-in with PKCE and tab-scoped transactions       |
+| [React](examples/react-app/README.md)                  | Sign-in drawer, hooks, session events and wallet pairing           |
+| [Next.js App Router](examples/next-app/README.md)      | Shared provider, callback route and server rendering               |
+| [Node.js server](examples/node-server/README.md)       | Confidential client with server-held tokens                        |
 | [Agent authentication](examples/agent-claim/README.md) | Public-key registration, owner claim and delegated resource access |
 
 ## Requirements

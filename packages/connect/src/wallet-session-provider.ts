@@ -20,35 +20,37 @@
  *    request aborted before Sanctum answered its send can't be withdrawn; it expires after 5 minutes.
  */
 import {
-  cancelled, PROVIDER_ERRORS, ProviderRpcError, type WalletSessionHandle, type WalletSessionMethod, type WalletSessionState, type WalletSessionTransport,
+  cancelled,
+  PROVIDER_ERRORS,
+  ProviderRpcError,
+  type WalletSessionHandle,
+  type WalletSessionMethod,
+  type WalletSessionState,
+  type WalletSessionTransport,
 } from "./wallet-session.ts";
 
 /** Waits between polls. An already-aborted signal (cancelled while a poll request was running) stops at once. */
-export const sleep = (ms: number, signal?: AbortSignal) => new Promise<void>((resolve, reject) => {
-  if (signal?.aborted) return reject(cancelled());
-  const timer = setTimeout(resolve, ms);
-  signal?.addEventListener("abort", () => { clearTimeout(timer); reject(cancelled()); }, { once: true });
-});
+export const sleep = (ms: number, signal?: AbortSignal) =>
+  new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) return reject(cancelled());
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(cancelled());
+      },
+      { once: true },
+    );
+  });
 
-/** EIP-1193 events a Sanctum wallet session emits, with their arguments. */
-export interface WalletProviderEvents {
-  accountsChanged: [accounts: string[]];
-  chainChanged: [chainId: string];
-  disconnect: [error: ProviderRpcError];
-}
-type Listener<E extends keyof WalletProviderEvents> = (...args: WalletProviderEvents[E]) => void;
-
-export interface WalletProviderOptions {
-  /** How often to ask whether the person decided a request (ms); default 1500. */
-  pollMs?: number;
-  /** How often to read the session's state while someone listens (ms); default 15000, kept within 500-120000. */
-  watchMs?: number;
-  /** Called once when the session is over (the SDK forgets a stored session here). */
-  onClose?: () => void;
-}
-
-/** A request this provider sent that is still waiting for the person. */
-export interface PendingWalletRequest { requestKey: string; requestId: string | null; method: WalletSessionMethod; startedAt: Date }
+export type { WalletProviderEvents, WalletProviderOptions, PendingWalletRequest } from "./wallet-provider-types.ts";
+import type {
+  Listener,
+  WalletProviderEvents,
+  WalletProviderOptions,
+  PendingWalletRequest,
+} from "./wallet-provider-types.ts";
 
 const MAX_WATCH_MS = 120_000;
 const hexChain = (chain: string | null) => `0x${Number(chain?.split(":")[1] ?? 0).toString(16)}`;
@@ -67,7 +69,12 @@ export class SanctumWalletProvider {
   #watch: ReturnType<typeof setTimeout> | null = null;
 
   /** `options` as a number is the request poll interval (the earlier signature). */
-  constructor(transport: WalletSessionTransport, session: WalletSessionHandle, state: WalletSessionState, options: number | WalletProviderOptions = {}) {
+  constructor(
+    transport: WalletSessionTransport,
+    session: WalletSessionHandle,
+    state: WalletSessionState,
+    options: number | WalletProviderOptions = {},
+  ) {
     const settings = typeof options === "number" ? { pollMs: options } : options;
     this.#transport = transport;
     this.#session = session;
@@ -77,8 +84,12 @@ export class SanctumWalletProvider {
     this.#onClose = settings.onClose;
   }
 
-  get accounts(): string[] { return this.#closed ? [] : [...this.#state.accounts]; }
-  get chainId(): string { return hexChain(this.#state.chain); }
+  get accounts(): string[] {
+    return this.#closed ? [] : [...this.#state.accounts];
+  }
+  get chainId(): string {
+    return hexChain(this.#state.chain);
+  }
 
   on<E extends keyof WalletProviderEvents>(event: E, listener: Listener<E>): this {
     const set = this.#listeners.get(event) ?? new Set();
@@ -94,17 +105,26 @@ export class SanctumWalletProvider {
     return this;
   }
 
-  #listening(): boolean { return [...this.#listeners.values()].some((set) => set.size > 0); }
+  #listening(): boolean {
+    return [...this.#listeners.values()].some((set) => set.size > 0);
+  }
 
   #emit<E extends keyof WalletProviderEvents>(event: E, ...args: WalletProviderEvents[E]): void {
     for (const listener of [...(this.#listeners.get(event) ?? [])]) {
-      try { (listener as Listener<E>)(...args); } catch { /* listeners can't break the provider */ }
+      try {
+        (listener as Listener<E>)(...args);
+      } catch {
+        /* listeners can't break the provider */
+      }
     }
   }
 
   #schedule(delay: number): void {
     if (this.#closed || this.#watch !== null || !this.#listening()) return;
-    this.#watch = setTimeout(() => { this.#watch = null; void this.#check(delay); }, delay);
+    this.#watch = setTimeout(() => {
+      this.#watch = null;
+      void this.#check(delay);
+    }, delay);
     // In Node, watching alone doesn't keep a process alive.
     (this.#watch as { unref?: () => void }).unref?.();
   }
@@ -120,7 +140,10 @@ export class SanctumWalletProvider {
     try {
       const state = await this.#transport.state(this.#session);
       if (this.#closed) return;
-      if (state.status !== "active") return this.#close(new ProviderRpcError(PROVIDER_ERRORS.disconnected, `The wallet session is ${state.status}`, state.status));
+      if (state.status !== "active")
+        return this.#close(
+          new ProviderRpcError(PROVIDER_ERRORS.disconnected, `The wallet session is ${state.status}`, state.status),
+        );
       if (state.chain !== this.#state.chain) {
         this.#state = { ...this.#state, chain: state.chain };
         this.#emit("chainChanged", hexChain(state.chain));
@@ -138,14 +161,23 @@ export class SanctumWalletProvider {
     this.#closed = error;
     this.#stopWatching();
     for (const entry of this.#pending.values()) entry.abort.abort();
-    try { this.#onClose?.(); } catch { /* forgetting is best effort */ }
+    try {
+      this.#onClose?.();
+    } catch {
+      /* forgetting is best effort */
+    }
     this.#emit("accountsChanged", []);
     this.#emit("disconnect", error);
   }
 
   /** This provider's requests still waiting for the person. */
   pendingRequests(): PendingWalletRequest[] {
-    return [...this.#pending.values()].map(({ requestKey, requestId, method, startedAt }) => ({ requestKey, requestId, method, startedAt }));
+    return [...this.#pending.values()].map(({ requestKey, requestId, method, startedAt }) => ({
+      requestKey,
+      requestId,
+      method,
+      startedAt,
+    }));
   }
 
   /** Stops waiting for one request and withdraws it at Sanctum; false if it isn't pending here. */
@@ -156,26 +188,56 @@ export class SanctumWalletProvider {
     return true;
   }
 
-  async request({ method, params = [] }: { method: string; params?: unknown[] }, signal?: AbortSignal): Promise<unknown> {
-    if (this.#closed) throw new ProviderRpcError(PROVIDER_ERRORS.disconnected, "The wallet session is over; connect again");
+  async request(
+    { method, params = [] }: { method: string; params?: unknown[] },
+    signal?: AbortSignal,
+  ): Promise<unknown> {
+    if (this.#closed)
+      throw new ProviderRpcError(PROVIDER_ERRORS.disconnected, "The wallet session is over; connect again");
     if (method === "eth_accounts" || method === "eth_requestAccounts") return this.accounts;
     if (method === "eth_chainId") return this.chainId;
     if (method === "wallet_switchEthereumChain") return this.#switchChain(params);
-    if (method === "wallet_getCapabilities") throw new ProviderRpcError(PROVIDER_ERRORS.unsupportedMethod, "Sanctum wallet sessions have no EIP-5792 capabilities", "capabilities_unsupported");
-    if (method !== "personal_sign" && method !== "eth_signTypedData_v4") throw new ProviderRpcError(PROVIDER_ERRORS.unsupportedMethod, `${method} is not supported by Sanctum wallet sessions`, "method_unsupported");
+    if (method === "wallet_getCapabilities")
+      throw new ProviderRpcError(
+        PROVIDER_ERRORS.unsupportedMethod,
+        "Sanctum wallet sessions have no EIP-5792 capabilities",
+        "capabilities_unsupported",
+      );
+    if (method !== "personal_sign" && method !== "eth_signTypedData_v4")
+      throw new ProviderRpcError(
+        PROVIDER_ERRORS.unsupportedMethod,
+        `${method} is not supported by Sanctum wallet sessions`,
+        "method_unsupported",
+      );
     return this.#sign(method, params, signal);
   }
 
   #switchChain(params: unknown[]): null {
     const chainId = (params[0] as { chainId?: unknown } | undefined)?.chainId;
-    if (typeof chainId !== "string" || !/^0x[1-9a-f][0-9a-f]*$/u.test(chainId)) throw new ProviderRpcError(PROVIDER_ERRORS.invalidParams, "wallet_switchEthereumChain needs a 0x chain ID", "params_invalid");
-    if (chainId !== this.chainId) throw new ProviderRpcError(PROVIDER_ERRORS.unrecognizedChain, "This wallet session isn't approved for that chain; connect again to use it", "chain_not_approved");
+    if (typeof chainId !== "string" || !/^0x[1-9a-f][0-9a-f]*$/u.test(chainId))
+      throw new ProviderRpcError(
+        PROVIDER_ERRORS.invalidParams,
+        "wallet_switchEthereumChain needs a 0x chain ID",
+        "params_invalid",
+      );
+    if (chainId !== this.chainId)
+      throw new ProviderRpcError(
+        PROVIDER_ERRORS.unrecognizedChain,
+        "This wallet session isn't approved for that chain; connect again to use it",
+        "chain_not_approved",
+      );
     return null;
   }
 
   async #sign(method: WalletSessionMethod, params: unknown[], signal?: AbortSignal): Promise<unknown> {
     const requestKey = `${Date.now().toString(36)}-${(this.#count += 1).toString(36)}-${crypto.randomUUID().slice(0, 8)}`;
-    const entry = { requestKey, requestId: null as string | null, method, startedAt: new Date(), abort: new AbortController() };
+    const entry = {
+      requestKey,
+      requestId: null as string | null,
+      method,
+      startedAt: new Date(),
+      abort: new AbortController(),
+    };
     const follow = () => entry.abort.abort();
     if (signal?.aborted) entry.abort.abort();
     signal?.addEventListener("abort", follow, { once: true });
@@ -193,9 +255,18 @@ export class SanctumWalletProvider {
       if (this.#closed) throw this.#closed;
       if (entry.abort.signal.aborted) throw cancelled();
       if (state.status === "approved" && state.result) return state.result;
-      if (state.status === "closed") throw new ProviderRpcError(PROVIDER_ERRORS.disconnected, "The wallet session ended before the person answered", "session_inactive");
+      if (state.status === "closed")
+        throw new ProviderRpcError(
+          PROVIDER_ERRORS.disconnected,
+          "The wallet session ended before the person answered",
+          "session_inactive",
+        );
       if (state.status === "cancelled") throw cancelled();
-      throw new ProviderRpcError(PROVIDER_ERRORS.userRejected, state.status === "expired" ? "The person didn't answer in time" : "The person rejected the request", state.status);
+      throw new ProviderRpcError(
+        PROVIDER_ERRORS.userRejected,
+        state.status === "expired" ? "The person didn't answer in time" : "The person rejected the request",
+        state.status,
+      );
     } catch (error) {
       if (error instanceof ProviderRpcError && error.code === PROVIDER_ERRORS.disconnected) this.#close(error);
       else if (entry.abort.signal.aborted && entry.requestId !== null && !this.#closed) {
@@ -211,7 +282,9 @@ export class SanctumWalletProvider {
 
   /** Ends local use immediately, emits once, then asks Sanctum to end the session. */
   async disconnect(): Promise<void> {
-    this.#close(new ProviderRpcError(PROVIDER_ERRORS.disconnected, "The app disconnected the wallet session", "disconnected"));
+    this.#close(
+      new ProviderRpcError(PROVIDER_ERRORS.disconnected, "The app disconnected the wallet session", "disconnected"),
+    );
     await this.#transport.end(this.#session);
   }
 }

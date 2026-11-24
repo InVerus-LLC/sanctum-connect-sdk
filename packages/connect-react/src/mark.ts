@@ -6,6 +6,9 @@ import { createElement, type SVGProps } from "react";
 import { MARK_PATH, MARK_VIEW_BOX } from "./mark-path.ts";
 
 export function SanctumMark(props: Omit<SVGProps<SVGSVGElement>, "children" | "viewBox">) {
-  return createElement("svg", { viewBox: MARK_VIEW_BOX, fill: "none", "aria-hidden": true, focusable: false, ...props },
-    createElement("path", { fillRule: "evenodd", clipRule: "evenodd", d: MARK_PATH, fill: "currentColor" }));
+  return createElement(
+    "svg",
+    { viewBox: MARK_VIEW_BOX, fill: "none", "aria-hidden": true, focusable: false, ...props },
+    createElement("path", { fillRule: "evenodd", clipRule: "evenodd", d: MARK_PATH, fill: "currentColor" }),
+  );
 }

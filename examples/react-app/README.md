@@ -1,6 +1,6 @@
 # React authentication and wallet example
 
-A React 19 application using `@inverus/connect-react`. It demonstrates the sign-in
+A React 19 application using `@sanctum.ai/connect-react`. It demonstrates the sign-in
 drawer, callback, session hooks, typed events and an optional Sanctum wallet session.
 React StrictMode is enabled.
 
@@ -25,10 +25,10 @@ from the **repository root**, not from this example's directory.
 
 Register a **public** client:
 
-| Setting | Value |
-| --- | --- |
-| Redirect URI | `http://127.0.0.1:5174/callback` |
-| Application origin | `http://127.0.0.1:5174` |
+| Setting            | Value                            |
+| ------------------ | -------------------------------- |
+| Redirect URI       | `http://127.0.0.1:5174/callback` |
+| Application origin | `http://127.0.0.1:5174`          |
 
 Set `data-issuer`, `data-client-id` and `data-redirect-uri` on `#root` in
 [index.html](index.html). The default issuer is `http://localhost:4400`.
@@ -76,10 +76,10 @@ are documented in the [React guide](../../packages/connect-react/README.md).
 
 ## Troubleshooting
 
-| Symptom | Check |
-| --- | --- |
-| Sign-in stays disabled | The issuer's discovery endpoint is reachable and the client ID is valid. |
-| `/callback` returns 404 | Include `--serve-fallback` in the command above. |
-| Controls have no styling | The HTML loads `/out/app.css`; both JS and CSS must be built. |
-| Wallet connection is refused | The wallet kit permits the exact origin, chain and method. |
-| Session disappears after refresh | Expected: this example keeps tokens in memory. |
+| Symptom                          | Check                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| Sign-in stays disabled           | The issuer's discovery endpoint is reachable and the client ID is valid. |
+| `/callback` returns 404          | Include `--serve-fallback` in the command above.                         |
+| Controls have no styling         | The HTML loads `/out/app.css`; both JS and CSS must be built.            |
+| Wallet connection is refused     | The wallet kit permits the exact origin, chain and method.               |
+| Session disappears after refresh | Expected: this example keeps tokens in memory.                           |

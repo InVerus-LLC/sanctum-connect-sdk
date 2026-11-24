@@ -7,6 +7,7 @@ export function rewriteConsumerSources(directory: string, names: PublicNames): v
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) rewriteConsumerSources(path, names);
-    else if (/\.(?:[cm]?js|tsx?)$/u.test(entry.name)) writeFileSync(path, rewriteModuleSpecifiers(readFileSync(path, "utf8"), names));
+    else if (/\.(?:[cm]?js|tsx?)$/u.test(entry.name))
+      writeFileSync(path, rewriteModuleSpecifiers(readFileSync(path, "utf8"), names));
   }
 }

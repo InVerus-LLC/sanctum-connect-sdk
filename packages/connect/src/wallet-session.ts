@@ -23,12 +23,22 @@
 export type WalletSessionMethod = "personal_sign" | "eth_signTypedData_v4";
 
 export interface WalletSessionState {
-  sessionId: string; status: "proposed" | "active" | "rejected" | "ended" | "expired";
-  accounts: string[]; chain: string | null; expiresAt: string;
+  sessionId: string;
+  status: "proposed" | "active" | "rejected" | "ended" | "expired";
+  accounts: string[];
+  chain: string | null;
+  expiresAt: string;
 }
-export interface PairingProposal extends WalletSessionState { sessionToken: string; pairingUri: string }
+export interface PairingProposal extends WalletSessionState {
+  sessionToken: string;
+  pairingUri: string;
+}
 /** `cancelled`: the app withdrew it; `closed`: the session ended before the person decided. */
-export interface RequestState { requestId: string; status: "pending" | "approved" | "rejected" | "expired" | "cancelled" | "closed"; result?: string }
+export interface RequestState {
+  requestId: string;
+  status: "pending" | "approved" | "rejected" | "expired" | "cancelled" | "closed";
+  result?: string;
+}
 
 /** A session as the app holds it: its ID and its bearer token (keep it like a password; never in a URL). */
 export type WalletSessionHandle = { sessionId: string; sessionToken: string };
@@ -42,7 +52,11 @@ type Signal = { signal?: AbortSignal };
 export interface WalletSessionTransport {
   propose(input: { chains: string[]; methods: WalletSessionMethod[] }, options?: Signal): Promise<PairingProposal>;
   state(session: Session, options?: Signal): Promise<WalletSessionState>;
-  send(session: Session, request: { requestKey: string; method: WalletSessionMethod; params: unknown[] }, options?: Signal): Promise<RequestState>;
+  send(
+    session: Session,
+    request: { requestKey: string; method: WalletSessionMethod; params: unknown[] },
+    options?: Signal,
+  ): Promise<RequestState>;
   result(session: Session, requestId: string, options?: Signal): Promise<RequestState>;
   /** Withdraws the app's own pending request (it stops waiting for the person); a decided one is returned as it is. */
   cancel?(session: Session, requestId: string, options?: Signal): Promise<RequestState>;
@@ -51,8 +65,14 @@ export interface WalletSessionTransport {
 
 /** EIP-1193 provider codes (with EIP-3326's 4902) and the EIP-1474 JSON-RPC codes this SDK uses. */
 export const PROVIDER_ERRORS = Object.freeze({
-  userRejected: 4001, unauthorized: 4100, unsupportedMethod: 4200, disconnected: 4900, unrecognizedChain: 4902,
-  invalidParams: -32602, internal: -32603, limitExceeded: -32005,
+  userRejected: 4001,
+  unauthorized: 4100,
+  unsupportedMethod: 4200,
+  disconnected: 4900,
+  unrecognizedChain: 4902,
+  invalidParams: -32602,
+  internal: -32603,
+  limitExceeded: -32005,
 } as const);
 export type ProviderRpcErrorCode = (typeof PROVIDER_ERRORS)[keyof typeof PROVIDER_ERRORS];
 
@@ -61,7 +81,12 @@ export class ProviderRpcError extends Error {
   readonly code: ProviderRpcErrorCode;
   readonly reason: string | undefined;
   readonly data: { status: number; error: string | undefined } | undefined;
-  constructor(code: ProviderRpcErrorCode, message: string, reason?: string, data?: { status: number; error: string | undefined }) {
+  constructor(
+    code: ProviderRpcErrorCode,
+    message: string,
+    reason?: string,
+    data?: { status: number; error: string | undefined },
+  ) {
     super(message);
     this.name = "ProviderRpcError";
     this.code = code;
@@ -72,7 +97,13 @@ export class ProviderRpcError extends Error {
 
 /** Which typed code an HTTP failure from Sanctum's wallet-session API is. */
 function codeFor(status: number, error: string | undefined, reason: string | undefined): ProviderRpcErrorCode {
-  if (status === 404 || reason === "session_inactive" || error === "app_disabled" || (status === 409 && error === "invalid_state")) return PROVIDER_ERRORS.disconnected;
+  if (
+    status === 404 ||
+    reason === "session_inactive" ||
+    error === "app_disabled" ||
+    (status === 409 && error === "invalid_state")
+  )
+    return PROVIDER_ERRORS.disconnected;
   if (reason === "method_unsupported") return PROVIDER_ERRORS.unsupportedMethod;
   if (status === 401 || status === 403 || reason === "method_not_approved") return PROVIDER_ERRORS.unauthorized;
   if (status === 429) return PROVIDER_ERRORS.limitExceeded;
@@ -82,7 +113,10 @@ function codeFor(status: number, error: string | undefined, reason: string | und
 
 /** The typed error for a failure reported as an HTTP status, error and reason (for transports other than Sanctum's too). */
 export function transportError(status: number, error?: string, reason?: string): ProviderRpcError {
-  return new ProviderRpcError(codeFor(status, error, reason), reason ?? error ?? `HTTP ${status}`, reason, { status, error });
+  return new ProviderRpcError(codeFor(status, error, reason), reason ?? error ?? `HTTP ${status}`, reason, {
+    status,
+    error,
+  });
 }
 
 /** The 4001 a cancelled (aborted) call rejects with. */
@@ -92,10 +126,14 @@ export const cancelled = () => new ProviderRpcError(PROVIDER_ERRORS.userRejected
  * Who proposes: an app's OAuth client (its wallet kit), or a Wallet project by its project ID, whose
  * networks, methods and origins Sanctum enforces (ADR-0033). Exactly one.
  */
-export type WalletSessionApp = { clientId: string; projectId?: undefined } | { projectId: string; clientId?: undefined };
+export type WalletSessionApp =
+  { clientId: string; projectId?: undefined } | { projectId: string; clientId?: undefined };
 
-export function sanctumTransport(config: { issuer: string; fetch?: typeof fetch } & WalletSessionApp): WalletSessionTransport {
-  if ((config.clientId === undefined) === (config.projectId === undefined)) throw new TypeError("sanctumTransport: give a clientId or a projectId");
+export function sanctumTransport(
+  config: { issuer: string; fetch?: typeof fetch } & WalletSessionApp,
+): WalletSessionTransport {
+  if ((config.clientId === undefined) === (config.projectId === undefined))
+    throw new TypeError("sanctumTransport: give a clientId or a projectId");
   const app = config.projectId === undefined ? { client_id: config.clientId } : { project_id: config.projectId };
   const base = `${config.issuer}/connect/v1/wallet-sessions`;
   const call = async (path: string, init: RequestInit & { token?: string }, options: Signal = {}) => {
@@ -103,8 +141,13 @@ export function sanctumTransport(config: { issuer: string; fetch?: typeof fetch 
     let response: Response;
     try {
       response = await (config.fetch ?? fetch)(`${base}${path}`, {
-        ...init, credentials: "omit", ...(options.signal ? { signal: options.signal } : {}),
-        headers: { "content-type": "application/json", ...(init.token ? { authorization: `Bearer ${init.token}` } : {}) },
+        ...init,
+        credentials: "omit",
+        ...(options.signal ? { signal: options.signal } : {}),
+        headers: {
+          "content-type": "application/json",
+          ...(init.token ? { authorization: `Bearer ${init.token}` } : {}),
+        },
       });
     } catch {
       if (options.signal?.aborted) throw cancelled();
@@ -112,31 +155,68 @@ export function sanctumTransport(config: { issuer: string; fetch?: typeof fetch 
     }
     const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
     if (!response.ok) {
-      throw transportError(response.status, typeof body.error === "string" ? body.error : undefined, typeof body.reason === "string" ? body.reason : undefined);
+      throw transportError(
+        response.status,
+        typeof body.error === "string" ? body.error : undefined,
+        typeof body.reason === "string" ? body.reason : undefined,
+      );
     }
     return body;
   };
   const state = (body: Record<string, unknown>): WalletSessionState => ({
-    sessionId: String(body.session_id), status: body.status as WalletSessionState["status"], accounts: (body.accounts as string[]) ?? [],
-    chain: (body.chain as string | null) ?? null, expiresAt: String(body.expires_at),
+    sessionId: String(body.session_id),
+    status: body.status as WalletSessionState["status"],
+    accounts: (body.accounts as string[]) ?? [],
+    chain: (body.chain as string | null) ?? null,
+    expiresAt: String(body.expires_at),
   });
   const request = (body: Record<string, unknown>): RequestState => ({
-    requestId: String(body.request_id), status: body.status as RequestState["status"], ...(typeof body.result === "string" ? { result: body.result } : {}),
+    requestId: String(body.request_id),
+    status: body.status as RequestState["status"],
+    ...(typeof body.result === "string" ? { result: body.result } : {}),
   });
   return {
     async propose(input, options) {
-      const body = await call("", { method: "POST", body: JSON.stringify({ ...app, chains: input.chains, methods: input.methods }) }, options);
+      const body = await call(
+        "",
+        { method: "POST", body: JSON.stringify({ ...app, chains: input.chains, methods: input.methods }) },
+        options,
+      );
       return { ...state(body), sessionToken: String(body.session_token), pairingUri: String(body.pairing_uri) };
     },
-    async state(session, options) { return state(await call(`/${session.sessionId}`, { method: "GET", token: session.sessionToken }, options)); },
+    async state(session, options) {
+      return state(await call(`/${session.sessionId}`, { method: "GET", token: session.sessionToken }, options));
+    },
     async send(session, input, options) {
       const payload = JSON.stringify({ request_key: input.requestKey, method: input.method, params: input.params });
-      return request(await call(`/${session.sessionId}/requests`, { method: "POST", token: session.sessionToken, body: payload }, options));
+      return request(
+        await call(
+          `/${session.sessionId}/requests`,
+          { method: "POST", token: session.sessionToken, body: payload },
+          options,
+        ),
+      );
     },
-    async result(session, requestId, options) { return request(await call(`/${session.sessionId}/requests/${encodeURIComponent(requestId)}`, { method: "GET", token: session.sessionToken }, options)); },
+    async result(session, requestId, options) {
+      return request(
+        await call(
+          `/${session.sessionId}/requests/${encodeURIComponent(requestId)}`,
+          { method: "GET", token: session.sessionToken },
+          options,
+        ),
+      );
+    },
     async cancel(session, requestId, options) {
-      return request(await call(`/${session.sessionId}/requests/${encodeURIComponent(requestId)}/cancel`, { method: "POST", token: session.sessionToken, body: "{}" }, options));
+      return request(
+        await call(
+          `/${session.sessionId}/requests/${encodeURIComponent(requestId)}/cancel`,
+          { method: "POST", token: session.sessionToken, body: "{}" },
+          options,
+        ),
+      );
     },
-    async end(session, options) { await call(`/${session.sessionId}/end`, { method: "POST", token: session.sessionToken, body: "{}" }, options); },
+    async end(session, options) {
+      await call(`/${session.sessionId}/end`, { method: "POST", token: session.sessionToken, body: "{}" }, options);
+    },
   };
 }

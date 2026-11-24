@@ -1,8 +1,8 @@
-# Third-party notices: @inverus/connect-react
+# Third-party notices: @sanctum.ai/connect-react
 
 This package bundles no third-party code. React is a peer dependency the app installs. The QR code
-encoder comes through `@inverus/connect/qr` (uqr 0.1.3, MIT); its notice is in
-`@inverus/connect`'s THIRD_PARTY_NOTICES.md.
+encoder comes through `@sanctum.ai/connect/qr` (uqr 0.1.3, MIT); its notice is in
+`@sanctum.ai/connect`'s THIRD_PARTY_NOTICES.md.
 
 ## Brand asset
 

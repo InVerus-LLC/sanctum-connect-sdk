@@ -1,7 +1,7 @@
-# @inverus/connect
+# @sanctum.ai/connect
 
 The framework-independent TypeScript SDK for apps that sign people in with Sanctum Connect, connect to a person's
-Sanctum wallet, and run agents. React bindings are [`@inverus/connect-react`](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect-react/README.md); native SDKs
+Sanctum wallet, and run agents. React bindings are [`@sanctum.ai/connect-react`](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect-react/README.md); native SDKs
 are not built yet.
 
 Under the hood it is OpenID Connect's authorization code flow with PKCE (S256), `state`, `nonce` and the RFC 9207 `iss`
@@ -13,11 +13,11 @@ author of `openid-client`). This package adds Sanctum's profile checks and a sma
 ## Install
 
 ```sh
-npm install @inverus/connect@next
+npm install @sanctum.ai/connect@next
 ```
 
 React bindings require React 19. Use ESM imports; CommonJS `require()` is not exported.
-Check the [npm package](https://www.npmjs.com/package/@inverus/connect) for available versions.
+Check the [npm package](https://www.npmjs.com/package/@sanctum.ai/connect) for available versions.
 
 ## Before you start
 
@@ -29,13 +29,13 @@ issuer and completed on its hosted pages, not by these package controls.
 
 ## Entry points
 
-| Import | Contents | Pulls in |
-| --- | --- | --- |
-| `@inverus/connect` | `SanctumConnect` (sign-in, userinfo, refresh, revoke, sign-out URL), wallet sessions, agent registration and tokens, errors | oauth4webapi (checked: no uqr) |
-| `@inverus/connect/wallets` | EIP-6963 discovery, the wallet catalogue and search | nothing else (checked: no oauth4webapi, no uqr) |
-| `@inverus/connect/qr` | `qrModules`, `qrTerminal` | uqr only (checked: no oauth4webapi) |
-| `@inverus/connect/receipts` | Signed receipt export verification with trusted owner/issuer/keys | jose (checked: no oauth4webapi, uqr or pg) |
-| `@inverus/connect/workloads` | `requestWorkloadToken` for existing workload trusts and delegations | oauth4webapi (checked: no jose, uqr or pg) |
+| Import                          | Contents                                                                                                                    | Pulls in                                        |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `@sanctum.ai/connect`           | `SanctumConnect` (sign-in, userinfo, refresh, revoke, sign-out URL), wallet sessions, agent registration and tokens, errors | oauth4webapi (checked: no uqr)                  |
+| `@sanctum.ai/connect/wallets`   | EIP-6963 discovery, the wallet catalogue and search                                                                         | nothing else (checked: no oauth4webapi, no uqr) |
+| `@sanctum.ai/connect/qr`        | `qrModules`, `qrTerminal`                                                                                                   | uqr only (checked: no oauth4webapi)             |
+| `@sanctum.ai/connect/receipts`  | Signed receipt export verification with trusted owner/issuer/keys                                                           | jose (checked: no oauth4webapi, uqr or pg)      |
+| `@sanctum.ai/connect/workloads` | `requestWorkloadToken` for existing workload trusts and delegations                                                         | oauth4webapi (checked: no jose, uqr or pg)      |
 
 There are no other entry points: internals and source are not exported, and the package is ESM only (`import`, not
 `require`).
@@ -46,16 +46,18 @@ The following is a flow outline across two requests, not a standalone HTTP handl
 Save and consume the transaction in your session adapter; `request` is your callback
 request. The [Node example](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/examples/node-server/README.md) supplies the complete wiring.
 
-
 ```ts
-import { SanctumConnect } from "@inverus/connect";
+import { SanctumConnect } from "@sanctum.ai/connect";
 
-const sanctum = await SanctumConnect.discover({
-  issuer: "https://id.example.com",
-  clientId: process.env.SANCTUM_CLIENT_ID!,
-  clientSecret: process.env.SANCTUM_CLIENT_SECRET, // server-side apps only
-  redirectUri: "https://app.example.com/callback",
-}, { signal: AbortSignal.timeout(10_000) });
+const sanctum = await SanctumConnect.discover(
+  {
+    issuer: "https://id.example.com",
+    clientId: process.env.SANCTUM_CLIENT_ID!,
+    clientSecret: process.env.SANCTUM_CLIENT_SECRET, // server-side apps only
+    redirectUri: "https://app.example.com/callback",
+  },
+  { signal: AbortSignal.timeout(10_000) },
+);
 
 // 1. Start: keep the transaction in your server session (never in the URL), then redirect.
 const { url, transaction } = await sanctum.startSignIn();
@@ -84,15 +86,15 @@ the agent helpers' options). A signal that already fired sends nothing; an abort
 
 Errors are `SanctumConnectError` with a stable `code`:
 
-| Code | Meaning |
-| --- | --- |
-| `configuration` | Bad issuer, redirect URI, client ID or hint |
-| `discovery` | The issuer's metadata couldn't be loaded, named another issuer, or lacked S256 PKCE, ES256 ID tokens or the `iss` parameter |
-| `access_denied`, `login_required`, `consent_required` | The person didn't complete sign-in (or an agent claim was denied) |
-| `invalid_response` | The callback belongs to another sign-in or issuer |
-| `token_failed` | A token request failed or a token didn't validate |
-| `expired` | An agent registration expired or was used |
-| `aborted` | The caller's own `AbortSignal` fired |
+| Code                                                  | Meaning                                                                                                                     |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `configuration`                                       | Bad issuer, redirect URI, client ID or hint                                                                                 |
+| `discovery`                                           | The issuer's metadata couldn't be loaded, named another issuer, or lacked S256 PKCE, ES256 ID tokens or the `iss` parameter |
+| `access_denied`, `login_required`, `consent_required` | The person didn't complete sign-in (or an agent claim was denied)                                                           |
+| `invalid_response`                                    | The callback belongs to another sign-in or issuer                                                                           |
+| `token_failed`                                        | A token request failed or a token didn't validate                                                                           |
+| `expired`                                             | An agent registration expired or was used                                                                                   |
+| `aborted`                                             | The caller's own `AbortSignal` fired                                                                                        |
 
 An abort after the code exchange left may still have redeemed the code: start a new sign-in.
 Cancelling `waitForClaim` rejects with `aborted`; an owner refusal uses `access_denied`.
@@ -101,16 +103,16 @@ Wallet sessions (`connectSanctumWallet`, `resumeSanctumWallet`, `SanctumWalletPr
 EIP-1193 providers. Their errors are `ProviderRpcError` with typed codes (`PROVIDER_ERRORS`), Sanctum's `reason` and
 `data: { status, error }`:
 
-| Code | When |
-| --- | --- |
-| 4001 `userRejected` | The person rejected or didn't answer, or the caller aborted (`reason: "aborted"`) |
-| 4100 `unauthorized` | Not authorized, including a method the session didn't approve (`method_not_approved`) |
+| Code                     | When                                                                                                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4001 `userRejected`      | The person rejected or didn't answer, or the caller aborted (`reason: "aborted"`)                                                                          |
+| 4100 `unauthorized`      | Not authorized, including a method the session didn't approve (`method_not_approved`)                                                                      |
 | 4200 `unsupportedMethod` | Anything but the methods below (`method_unsupported`, also from the server); `wallet_getCapabilities` (`capabilities_unsupported`: no EIP-5792 capability) |
-| 4900 `disconnected` | The session ended, expired, was withdrawn by the app's developer or is unknown (`session_inactive`), or the app is disabled (`app_disabled`) |
-| 4902 `unrecognizedChain` | `wallet_switchEthereumChain` to another chain than the session's (`chain_not_approved`): connect again |
-| -32602 `invalidParams` | A malformed request, a reused request key, or a request Sanctum won't sign (see below; `reason` says which) |
-| -32005 `limitExceeded` | Too many proposals or waiting requests (`proposal_limit`, `request_limit`) |
-| -32603 `internal` | Sanctum failed or couldn't be reached (`network_error`) |
+| 4900 `disconnected`      | The session ended, expired, was withdrawn by the app's developer or is unknown (`session_inactive`), or the app is disabled (`app_disabled`)               |
+| 4902 `unrecognizedChain` | `wallet_switchEthereumChain` to another chain than the session's (`chain_not_approved`): connect again                                                     |
+| -32602 `invalidParams`   | A malformed request, a reused request key, or a request Sanctum won't sign (see below; `reason` says which)                                                |
+| -32005 `limitExceeded`   | Too many proposals or waiting requests (`proposal_limit`, `request_limit`)                                                                                 |
+| -32603 `internal`        | Sanctum failed or couldn't be reached (`network_error`)                                                                                                    |
 
 Methods: `eth_accounts`, `eth_requestAccounts`, `eth_chainId`, `personal_sign`, `eth_signTypedData_v4` and
 `wallet_switchEthereumChain` to the session's own chain (a session holds one wallet on one network). The provider
@@ -141,9 +143,13 @@ session approval, cancellation and error contract.
 ## Agents
 
 ```ts
-import { registerAgentWithSanctum, requestAgentToken, agentResourceRequest } from "@inverus/connect";
+import { registerAgentWithSanctum, requestAgentToken, agentResourceRequest } from "@sanctum.ai/connect";
 
-const registration = await registerAgentWithSanctum({ issuer: "https://id.example.com", name: "Inbox helper", publicKey: publicJwk });
+const registration = await registerAgentWithSanctum({
+  issuer: "https://id.example.com",
+  name: "Inbox helper",
+  publicKey: publicJwk,
+});
 console.log(`Claim me at ${registration.verificationUri} with code ${registration.userCode}`);
 const { clientId } = await registration.waitForClaim(); // then authenticate with signed assertions (RFC 7523)
 const token = await requestAgentToken({ issuer, auth: { clientAssertion }, resource, grantId });
@@ -151,20 +157,20 @@ const response = await agentResourceRequest({ token, method: "GET", url: `${reso
 ```
 
 `createDpopKey`, `exchangeAgentToken` (RFC 8693, narrowed with `tools`/`limits`) and DPoP-bound tokens are covered in
-the source comments. For a terminal, `qrTerminal(registration.verificationUriComplete)` from `@inverus/connect/qr`
+the source comments. For a terminal, `qrTerminal(registration.verificationUriComplete)` from `@sanctum.ai/connect/qr`
 prints the claim link as a QR code. The private key never leaves the runtime, and a claimed agent has no access until
 someone delegates it some.
 
 ## Runtime support
 
-| Runtime | Support | Evidence |
-| --- | --- | --- |
-| Node 22 LTS (≥ 22.15.1) and Node 26 | Supported (`engines: >=22.15.1`) | The packed tarball is imported and used on 22.15.1 and 26.13.1 (consumer smoke test) |
-| Node 24 | Expected to work | Not run here |
-| Node 20 | Not supported (end of life since April 2026) | Not in the supported release matrix |
-| Chrome | Browser integration target | Standard Fetch, Web Crypto and URL APIs; issuer required for sign-in |
-| Firefox, Safari | Expected (standard `fetch`, WebCrypto, `URL`) | Not run here |
-| Server rendering, edge/server runtimes | Importing touches no browser global | `tests/unit/sdk-ssr.test.ts` and the consumer smoke test trap `window`, `document`, `navigator`, storage, `location` |
+| Runtime                                | Support                                       | Evidence                                                                                                             |
+| -------------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Node 22 LTS (≥ 22.15.1) and Node 26    | Supported (`engines: >=22.15.1`)              | The packed tarball is imported and used on 22.15.1 and 26.13.1 (consumer smoke test)                                 |
+| Node 24                                | Expected to work                              | Not run here                                                                                                         |
+| Node 20                                | Not supported (end of life since April 2026)  | Not in the supported release matrix                                                                                  |
+| Chrome                                 | Browser integration target                    | Standard Fetch, Web Crypto and URL APIs; issuer required for sign-in                                                 |
+| Firefox, Safari                        | Expected (standard `fetch`, WebCrypto, `URL`) | Not run here                                                                                                         |
+| Server rendering, edge/server runtimes | Importing touches no browser global           | `tests/unit/sdk-ssr.test.ts` and the consumer smoke test trap `window`, `document`, `navigator`, storage, `location` |
 
 TypeScript: the declarations need either the DOM library or `@types/node` (for `fetch`, `AbortSignal`, `EventTarget`);
 both are type-checked in the consumer smoke test with `skipLibCheck` off.
@@ -196,7 +202,7 @@ See the [contributor guide](https://github.com/InVerus-LLC/sanctum-connect-sdk/b
 
 ## Verify an exported receipt chain
 
-Import `verifySignedReceipts` from `@inverus/connect/receipts`. It runs with Web
+Import `verifySignedReceipts` from `@sanctum.ai/connect/receipts`. It runs with Web
 Crypto in browsers and Node and has no database or network dependency:
 
 ```ts

@@ -28,16 +28,51 @@ export const RECEIPT_CHECKPOINT_TYP = "sanctum-receipt-checkpoint+jwt";
 export const GENESIS_HASH = "0".repeat(64);
 
 export type ReceiptValue = string | number | boolean | null;
-export interface ReceiptRecord { seq: number; prevHash: string; hash: string; body: string }
+export interface ReceiptRecord {
+  seq: number;
+  prevHash: string;
+  hash: string;
+  body: string;
+}
 /** An owner's receipts after `next`-less export: the whole chain (or the part after an earlier head), its head and a checkpoint. */
-export interface ReceiptExport { version: 1; owner: string; receipts: ReceiptRecord[]; head: { seq: number; hash: string }; next: number | null; checkpoint: string | null }
-export interface ReceiptCheckpoint { v: 1; owner: string; seq: number; head: string }
+export interface ReceiptExport {
+  version: 1;
+  owner: string;
+  receipts: ReceiptRecord[];
+  head: { seq: number; hash: string };
+  next: number | null;
+  checkpoint: string | null;
+}
+export interface ReceiptCheckpoint {
+  v: 1;
+  owner: string;
+  seq: number;
+  head: string;
+}
 
 export type ReceiptProblem =
-  | "version_unsupported" | "incomplete" | "sequence_gap" | "previous_hash_mismatch" | "hash_mismatch" | "body_invalid" | "not_canonical" | "owner_mismatch"
-  | "head_mismatch" | "anchor_missing" | "anchor_mismatch" | "checkpoint_missing" | "checkpoint_invalid" | "checkpoint_mismatch";
+  | "version_unsupported"
+  | "incomplete"
+  | "sequence_gap"
+  | "previous_hash_mismatch"
+  | "hash_mismatch"
+  | "body_invalid"
+  | "not_canonical"
+  | "owner_mismatch"
+  | "head_mismatch"
+  | "anchor_missing"
+  | "anchor_mismatch"
+  | "checkpoint_missing"
+  | "checkpoint_invalid"
+  | "checkpoint_mismatch";
 export type ReceiptVerification =
-  | { valid: true; seq: number; head: string; receipts: Record<string, ReceiptValue>[]; checkpoint: (ReceiptCheckpoint & { kid: string }) | null }
+  | {
+      valid: true;
+      seq: number;
+      head: string;
+      receipts: Record<string, ReceiptValue>[];
+      checkpoint: (ReceiptCheckpoint & { kid: string }) | null;
+    }
   | { valid: false; problem: ReceiptProblem; seq: number | null };
 
 export interface VerifyOptions {
@@ -59,7 +94,11 @@ export function canonicalReceipt(fields: Record<string, ReceiptValue>): string {
   const keys = Object.keys(fields).sort();
   const parts = keys.map((key) => {
     const value = fields[key];
-    const allowed = value === null || typeof value === "string" || typeof value === "boolean" || (typeof value === "number" && Number.isSafeInteger(value) && Math.abs(value) < 1e15);
+    const allowed =
+      value === null ||
+      typeof value === "string" ||
+      typeof value === "boolean" ||
+      (typeof value === "number" && Number.isSafeInteger(value) && Math.abs(value) < 1e15);
     if (!KEY.test(key) || !allowed) throw new TypeError(`receipt field ${key} is not allowed in form v1`);
     return `${JSON.stringify(key)}:${JSON.stringify(value)}`;
   });
@@ -68,7 +107,10 @@ export function canonicalReceipt(fields: Record<string, ReceiptValue>): string {
 
 /** The chain hash of a receipt body after the receipt whose hash is `prevHash` (hex). */
 export async function receiptHash(prevHash: string, body: string): Promise<string> {
-  const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(`sanctum.receipt.v1\n${prevHash}\n${body}`));
+  const digest = await globalThis.crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(`sanctum.receipt.v1\n${prevHash}\n${body}`),
+  );
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
@@ -83,7 +125,8 @@ export function parseReceipt(body: string): Record<string, ReceiptValue> | null 
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return null;
   const fields: Record<string, ReceiptValue> = {};
   for (const [key, value] of Object.entries(parsed)) {
-    if (value !== null && typeof value !== "string" && typeof value !== "boolean" && typeof value !== "number") return null;
+    if (value !== null && typeof value !== "string" && typeof value !== "boolean" && typeof value !== "number")
+      return null;
     Object.defineProperty(fields, key, { value, enumerable: true });
   }
   try {
@@ -93,8 +136,15 @@ export function parseReceipt(body: string): Record<string, ReceiptValue> | null 
   }
 }
 
-export async function verifyReceipts(exported: ReceiptExport, options: VerifyOptions = {}): Promise<ReceiptVerification> {
-  const fail = (problem: ReceiptProblem, seq: number | null = null): ReceiptVerification => ({ valid: false, problem, seq });
+export async function verifyReceipts(
+  exported: ReceiptExport,
+  options: VerifyOptions = {},
+): Promise<ReceiptVerification> {
+  const fail = (problem: ReceiptProblem, seq: number | null = null): ReceiptVerification => ({
+    valid: false,
+    problem,
+    seq,
+  });
   if (exported.version !== RECEIPT_VERSION) return fail("version_unsupported");
   if (exported.next !== null) return fail("incomplete");
   let last = options.from ?? { seq: 0, hash: GENESIS_HASH };
@@ -103,10 +153,12 @@ export async function verifyReceipts(exported: ReceiptExport, options: VerifyOpt
   for (const receipt of exported.receipts) {
     if (receipt.seq !== last.seq + 1) return fail("sequence_gap", receipt.seq);
     if (receipt.prevHash !== last.hash) return fail("previous_hash_mismatch", receipt.seq);
-    if (!HEX.test(receipt.hash) || (await receiptHash(receipt.prevHash, receipt.body)) !== receipt.hash) return fail("hash_mismatch", receipt.seq);
+    if (!HEX.test(receipt.hash) || (await receiptHash(receipt.prevHash, receipt.body)) !== receipt.hash)
+      return fail("hash_mismatch", receipt.seq);
     const parsed = parseReceipt(receipt.body);
     if (!parsed) return fail("not_canonical", receipt.seq);
-    if (parsed.v !== RECEIPT_VERSION || parsed.seq !== receipt.seq || typeof parsed.kind !== "string") return fail("body_invalid", receipt.seq);
+    if (parsed.v !== RECEIPT_VERSION || parsed.seq !== receipt.seq || typeof parsed.kind !== "string")
+      return fail("body_invalid", receipt.seq);
     if (parsed.owner !== exported.owner) return fail("owner_mismatch", receipt.seq);
     fields.push(parsed);
     last = { seq: receipt.seq, hash: receipt.hash };
@@ -122,20 +174,33 @@ export async function verifyReceipts(exported: ReceiptExport, options: VerifyOpt
   if (!exported.checkpoint) return fail("checkpoint_missing");
   let checkpoint: ReceiptCheckpoint & { kid: string };
   try {
-    const verified = await compactVerify(exported.checkpoint, createLocalJWKSet(options.keys), { algorithms: ["ES256"] });
+    const verified = await compactVerify(exported.checkpoint, createLocalJWKSet(options.keys), {
+      algorithms: ["ES256"],
+    });
     if (verified.protectedHeader.typ !== RECEIPT_CHECKPOINT_TYP) return fail("checkpoint_invalid");
     const claims: unknown = JSON.parse(new TextDecoder().decode(verified.payload));
     if (!isRecord(claims)) return fail("checkpoint_invalid");
     const claim = claims[RECEIPT_CHECKPOINT_CLAIM];
-    if ((options.issuer !== undefined && claims.iss !== options.issuer) || !isRecord(claim) || claim.v !== RECEIPT_VERSION
-      || typeof claim.owner !== "string" || typeof claim.seq !== "number" || !Number.isSafeInteger(claim.seq) || claim.seq < 0
-      || typeof claim.head !== "string" || !HEX.test(claim.head)
-      || typeof verified.protectedHeader.kid !== "string" || !verified.protectedHeader.kid) return fail("checkpoint_invalid");
+    if (
+      (options.issuer !== undefined && claims.iss !== options.issuer) ||
+      !isRecord(claim) ||
+      claim.v !== RECEIPT_VERSION ||
+      typeof claim.owner !== "string" ||
+      typeof claim.seq !== "number" ||
+      !Number.isSafeInteger(claim.seq) ||
+      claim.seq < 0 ||
+      typeof claim.head !== "string" ||
+      !HEX.test(claim.head) ||
+      typeof verified.protectedHeader.kid !== "string" ||
+      !verified.protectedHeader.kid
+    )
+      return fail("checkpoint_invalid");
     checkpoint = { v: 1, owner: claim.owner, seq: claim.seq, head: claim.head, kid: verified.protectedHeader.kid };
   } catch {
     return fail("checkpoint_invalid");
   }
-  if (checkpoint.owner !== exported.owner || checkpoint.seq !== last.seq || checkpoint.head !== last.hash) return fail("checkpoint_mismatch", checkpoint.seq);
+  if (checkpoint.owner !== exported.owner || checkpoint.seq !== last.seq || checkpoint.head !== last.hash)
+    return fail("checkpoint_mismatch", checkpoint.seq);
   return { valid: true, seq: last.seq, head: last.hash, receipts: fields, checkpoint };
 }
 

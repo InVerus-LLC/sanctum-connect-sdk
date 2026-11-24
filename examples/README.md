@@ -3,13 +3,13 @@
 Choose the example closest to your application. Each guide includes setup,
 configuration, commands and a walkthrough using your own Sanctum Connect issuer.
 
-| Example | Client type | Local address | Start here |
-| --- | --- | --- | --- |
-| Browser TypeScript | Public, PKCE | `http://127.0.0.1:5173/` | [Guide](browser-ts/README.md) |
-| React 19 | Public, PKCE | `http://127.0.0.1:5174/` | [Guide](react-app/README.md) |
-| Next.js App Router | Public, PKCE | `http://127.0.0.1:5175/` | [Guide](next-app/README.md) |
-| Node.js server | Confidential | `http://127.0.0.1:4430/` | [Guide](node-server/README.md) |
-| Agent runtime | Public-key authentication | Terminal | [Guide](agent-claim/README.md) |
+| Example            | Client type               | Local address            | Start here                     |
+| ------------------ | ------------------------- | ------------------------ | ------------------------------ |
+| Browser TypeScript | Public, PKCE              | `http://127.0.0.1:5173/` | [Guide](browser-ts/README.md)  |
+| React 19           | Public, PKCE              | `http://127.0.0.1:5174/` | [Guide](react-app/README.md)   |
+| Next.js App Router | Public, PKCE              | `http://127.0.0.1:5175/` | [Guide](next-app/README.md)    |
+| Node.js server     | Confidential              | `http://127.0.0.1:4430/` | [Guide](node-server/README.md) |
+| Agent runtime      | Public-key authentication | Terminal                 | [Guide](agent-claim/README.md) |
 
 ## Before running an example
 
@@ -38,6 +38,6 @@ None of these examples executes a real payment.
 
 ## Using the published SDKs
 
-In your own application, install `@inverus/connect@next` and, for React,
-`@inverus/connect-react@next`. The [TypeScript](../packages/connect/README.md) and
+In your own application, install `@sanctum.ai/connect@next` and, for React,
+`@sanctum.ai/connect-react@next`. The [TypeScript](../packages/connect/README.md) and
 [React](../packages/connect-react/README.md) guides describe the public APIs.

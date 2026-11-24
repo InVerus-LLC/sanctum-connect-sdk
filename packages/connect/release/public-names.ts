@@ -1,7 +1,10 @@
 /** Release-only namespace mapping; workspace source identity stays unchanged. */
 import ts from "typescript";
 
-export interface PublicIdentity { name: string; version: string }
+export interface PublicIdentity {
+  name: string;
+  version: string;
+}
 export type PublicNames = ReadonlyMap<string, PublicIdentity>;
 
 export function publicDependencies(dependencies: Record<string, string>, names: PublicNames): Record<string, string> {
@@ -46,8 +49,12 @@ export function rewriteModuleSpecifiers(source: string, names: PublicNames): str
     if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) add(node.moduleSpecifier);
     else if (ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument)) add(node.argument.literal);
     else if (ts.isExternalModuleReference(node)) add(node.expression);
-    else if (ts.isCallExpression(node)
-      && (node.expression.kind === ts.SyntaxKind.ImportKeyword || (ts.isIdentifier(node.expression) && node.expression.text === "require"))) add(node.arguments[0]);
+    else if (
+      ts.isCallExpression(node) &&
+      (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+        (ts.isIdentifier(node.expression) && node.expression.text === "require"))
+    )
+      add(node.arguments[0]);
     ts.forEachChild(node, visit);
   };
   visit(file);

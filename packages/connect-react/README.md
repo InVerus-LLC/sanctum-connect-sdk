@@ -1,6 +1,6 @@
-# @inverus/connect-react
+# @sanctum.ai/connect-react
 
-React 19 bindings for [`@inverus/connect`](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect/README.md): "Continue with Sanctum" sign-in for browser apps
+React 19 bindings for [`@sanctum.ai/connect`](https://github.com/InVerus-LLC/sanctum-connect-sdk/blob/dev/packages/connect/README.md): "Continue with Sanctum" sign-in for browser apps
 (public clients with PKCE), the callback page, an in-memory session, and connecting to a person's Sanctum wallet. No
 framework is required; it works with Next.js (App Router included), Vite or a plain bundler.
 
@@ -9,11 +9,11 @@ framework is required; it works with Next.js (App Router included), Vite or a pl
 ## Install
 
 ```sh
-npm install @inverus/connect@next @inverus/connect-react@next
+npm install @sanctum.ai/connect@next @sanctum.ai/connect-react@next
 ```
 
 React bindings require React 19. Use ESM imports; CommonJS `require()` is not exported.
-Check the [npm package](https://www.npmjs.com/package/@inverus/connect-react) for available versions.
+Check the [npm package](https://www.npmjs.com/package/@sanctum.ai/connect-react) for available versions.
 
 ## Before you start
 
@@ -33,8 +33,8 @@ during a server render.
 
 ```tsx
 import { useState } from "react";
-import { SanctumProvider, SignInButton, SignInCallback, useSession } from "@inverus/connect-react";
-import "@inverus/connect-react/styles.css";
+import { SanctumProvider, SignInButton, SignInCallback, useSession } from "@sanctum.ai/connect-react";
+import "@sanctum.ai/connect-react/styles.css";
 
 export function App() {
   const [callback, setCallback] = useState(() => location.pathname === "/callback");
@@ -43,8 +43,11 @@ export function App() {
     setCallback(false);
   }
   return (
-    <SanctumProvider issuer="https://id.example.com" clientId="YOUR_CLIENT_ID"
-      redirectUri="https://app.example.com/callback">
+    <SanctumProvider
+      issuer="https://id.example.com"
+      clientId="YOUR_CLIENT_ID"
+      redirectUri="https://app.example.com/callback"
+    >
       {callback ? <SignInCallback onSignedIn={finish} /> : <Home />}
     </SanctumProvider>
   );
@@ -59,7 +62,7 @@ function Home() {
 Wallet sessions (the app's wallet kit must allow the chain, the method and the app's origin):
 
 ```tsx
-import { SanctumWalletConnect, useWalletSession } from "@inverus/connect-react";
+import { SanctumWalletConnect, useWalletSession } from "@sanctum.ai/connect-react";
 
 function Wallet() {
   const wallet = useWalletSession({ chains: ["eip155:84532"], methods: ["personal_sign"] });
@@ -76,7 +79,7 @@ function Wallet() {
 The sign-in drawer (methods and a wallet picker) instead of a plain button:
 
 ```tsx
-import { SignInDrawerButton } from "@inverus/connect-react";
+import { SignInDrawerButton } from "@sanctum.ai/connect-react";
 
 <SignInDrawerButton />; // "Continue with Sanctum" → the drawer
 ```
@@ -90,9 +93,14 @@ imported from server components).
 Typed events, without tokens: pass `onEvent` to `<SanctumProvider>` or `subscribe` from `useSanctum()`.
 
 ```tsx
-<SanctumProvider issuer={issuer} clientId={clientId} redirectUri={redirectUri} onEvent={(event) => {
-  // event.type: "ready" | "sign_in_started" | "signed_in" | "refreshed" | "signed_out" | "error" (with `during`)
-}} />
+<SanctumProvider
+  issuer={issuer}
+  clientId={clientId}
+  redirectUri={redirectUri}
+  onEvent={(event) => {
+    // event.type: "ready" | "sign_in_started" | "signed_in" | "refreshed" | "signed_out" | "error" (with `during`)
+  }}
+/>
 ```
 
 Each outcome is announced once, also under StrictMode. Errors are `SanctumReactError` with a `code` (the core SDK's
@@ -103,28 +111,28 @@ the hooks and reducers the components use: `useSignIn`, `useSignInCallback`, `us
 
 ## Components and session behavior
 
-| Piece | Behaviour |
-| --- | --- |
-| `SanctumProvider` | Discovers the issuer in an effect, once per configuration in a page; a server render shows the loading state and makes no request. |
-| `SignInButton`, `useSignIn` | Disabled until discovery finishes; ignores double clicks; resets when the person comes back with Back. The transaction (state, nonce, PKCE verifier) waits in this tab's `sessionStorage` for at most ten minutes. |
-| `SignInCallback`, `useSignInCallback` | Finishes the sign-in once per `state` in a page (StrictMode's double effects share one token exchange), removes `code` and `state` from the address bar and history, and fails truthfully for a reloaded, replayed or other-tab callback (`transaction_missing`). |
-| `useSession` | The session lives in memory only: no token is ever written to storage, a URL or a message, so a reload signs the app out. `refresh()` keeps only the newest (rotated) refresh token; `signOut()` revokes both tokens, and `{ endSanctumSession: true }` also ends the Sanctum session (RP-initiated logout). Apps that need longer sessions should use a server-side (confidential) integration with `@inverus/connect`. |
-| `useWalletSession`, `SanctumWalletConnect` | Each connection attempt has a number; a late pairing link or approval for an older attempt is ignored, and a late approval is ended. Cancel, Disconnect and unmount end the proposed or connected session. The pairing link is a one-time capability: it's kept only while waiting and never rendered as text. Requests go through `wallet.request` (EIP-1193 `personal_sign`, `eth_signTypedData_v4`); the person approves each one in Sanctum. |
+| Piece                                       | Behaviour                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SanctumProvider`                           | Discovers the issuer in an effect, once per configuration in a page; a server render shows the loading state and makes no request.                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `SignInButton`, `useSignIn`                 | Disabled until discovery finishes; ignores double clicks; resets when the person comes back with Back. The transaction (state, nonce, PKCE verifier) waits in this tab's `sessionStorage` for at most ten minutes.                                                                                                                                                                                                                                                                                                                                         |
+| `SignInCallback`, `useSignInCallback`       | Finishes the sign-in once per `state` in a page (StrictMode's double effects share one token exchange), removes `code` and `state` from the address bar and history, and fails truthfully for a reloaded, replayed or other-tab callback (`transaction_missing`).                                                                                                                                                                                                                                                                                          |
+| `useSession`                                | The session lives in memory only: no token is ever written to storage, a URL or a message, so a reload signs the app out. `refresh()` keeps only the newest (rotated) refresh token; `signOut()` revokes both tokens, and `{ endSanctumSession: true }` also ends the Sanctum session (RP-initiated logout). Apps that need longer sessions should use a server-side (confidential) integration with `@sanctum.ai/connect`.                                                                                                                                |
+| `useWalletSession`, `SanctumWalletConnect`  | Each connection attempt has a number; a late pairing link or approval for an older attempt is ignored, and a late approval is ended. Cancel, Disconnect and unmount end the proposed or connected session. The pairing link is a one-time capability: it's kept only while waiting and never rendered as text. Requests go through `wallet.request` (EIP-1193 `personal_sign`, `eth_signTypedData_v4`); the person approves each one in Sanctum.                                                                                                           |
 | `SignInDrawerButton`, `SanctumSignInDrawer` | The embedded sign-in chooser. It is a native `<dialog>`: modal, Escape or the backdrop closes it, and focus returns to the opener. On phones it is a bottom sheet, and motion is off under reduced-motion settings. It reads the app's public wallet kit, so it offers only methods Sanctum will accept for this app. The person's choice travels as a sign-in hint (`sanctum_method`, plus `sanctum_wallet` for a browser wallet), and Sanctum's page opens that way. Every proof (passkey, wallet signature, SSO) still happens on Sanctum's own origin. |
-| Wallet picker (in the drawer) | Lists Ethereum wallets this browser announces through EIP-6963. Their names and icons are untrusted: icons are drawn only as data-URI `<img>`, and the reverse-DNS id is just a hint. It also lists catalogue wallets: Ethereum ones link to their reviewed home pages because they can't sign in until installed, and Bitcoin ones sign a BIP-322 message on Sanctum. Search ignores case and accents and matches aliases; there is a chain filter, Clear, empty results and arrow-key movement.  |
-| `SanctumQrCode` | A QR code drawn as one SVG path, dark on light, with no injected HTML (encoder: uqr 0.1.3 through `@inverus/connect/qr`). The wallet controls use it for the pairing link and say when the link stops working. |
-| `SanctumMark` | The exact Sanctum Connect mark (checked against `assets/brand/sanctum-connect-mark.svg`). |
-| `themeCss` | Typed theme tokens to CSS custom properties for your own stylesheet: no inline styles or injected `<style>`, so a strict Content Security Policy works. Values that could inject CSS are refused. |
+| Wallet picker (in the drawer)               | Lists Ethereum wallets this browser announces through EIP-6963. Their names and icons are untrusted: icons are drawn only as data-URI `<img>`, and the reverse-DNS id is just a hint. It also lists catalogue wallets: Ethereum ones link to their reviewed home pages because they can't sign in until installed, and Bitcoin ones sign a BIP-322 message on Sanctum. Search ignores case and accents and matches aliases; there is a chain filter, Clear, empty results and arrow-key movement.                                                          |
+| `SanctumQrCode`                             | A QR code drawn as one SVG path, dark on light, with no injected HTML (encoder: uqr 0.1.3 through `@sanctum.ai/connect/qr`). The wallet controls use it for the pairing link and say when the link stops working.                                                                                                                                                                                                                                                                                                                                          |
+| `SanctumMark`                               | The exact Sanctum Connect mark (checked against `assets/brand/sanctum-connect-mark.svg`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `themeCss`                                  | Typed theme tokens to CSS custom properties for your own stylesheet: no inline styles or injected `<style>`, so a strict Content Security Policy works. Values that could inject CSS are refused.                                                                                                                                                                                                                                                                                                                                                          |
 
 ## Runtime support and server rendering
 
-| Where | Support | Evidence |
-| --- | --- | --- |
-| React 19 in Chrome | Browser integration target | Standard browser APIs; issuer required for sign-in |
-| Firefox, Safari | Expected (native `<dialog>`, standard APIs) | Not run here |
-| Server rendering (`react-dom/server`) | Supported: renders inert controls, touches no browser global, sends no request | `tests/unit/sdk-ssr.test.ts`, `tests/unit/connect-react.test.ts`, and the packed tarball on Node 22.15.1 and 26.13.1 |
-| Next.js App Router | Supported: import from server components; the client modules carry `"use client"` | `next build` of examples/next-app (16.4.6) against the packed tarballs |
-| Node for SSR | 22 LTS (≥ 22.15.1) and 26 | As for `@inverus/connect` |
+| Where                                 | Support                                                                           | Evidence                                                                                                             |
+| ------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| React 19 in Chrome                    | Browser integration target                                                        | Standard browser APIs; issuer required for sign-in                                                                   |
+| Firefox, Safari                       | Expected (native `<dialog>`, standard APIs)                                       | Not run here                                                                                                         |
+| Server rendering (`react-dom/server`) | Supported: renders inert controls, touches no browser global, sends no request    | `tests/unit/sdk-ssr.test.ts`, `tests/unit/connect-react.test.ts`, and the packed tarball on Node 22.15.1 and 26.13.1 |
+| Next.js App Router                    | Supported: import from server components; the client modules carry `"use client"` | `next build` of examples/next-app (16.4.6) against the packed tarballs                                               |
+| Node for SSR                          | 22 LTS (≥ 22.15.1) and 26                                                         | As for `@sanctum.ai/connect`                                                                                         |
 
 Nothing reads `window`, `document` or storage while rendering; discovery, the kit, wallet discovery and the session
 start in effects on the client. The session lives in memory, so a server render is always signed out.

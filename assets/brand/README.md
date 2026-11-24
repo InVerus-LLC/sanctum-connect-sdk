@@ -7,16 +7,16 @@
 This folder contains the canonical Sanctum Connect logo used by the SDK's
 sign-in controls and repository documentation.
 
-| Asset | Format | Purpose |
-| --- | --- | --- |
-| [sanctum-connect-mark.svg](sanctum-connect-mark.svg) | SVG | Scalable logo for authorized Sanctum Connect integrations |
+| Asset                                                | Format | Purpose                                                   |
+| ---------------------------------------------------- | ------ | --------------------------------------------------------- |
+| [sanctum-connect-mark.svg](sanctum-connect-mark.svg) | SVG    | Scalable logo for authorized Sanctum Connect integrations |
 
 ## Use the React component
 
 ```tsx
-import { SanctumMark } from "@inverus/connect-react";
+import { SanctumMark } from "@sanctum.ai/connect-react";
 
-<SanctumMark width={32} height={32} />
+<SanctumMark width={32} height={32} />;
 ```
 
 Use the SDK's `SignInButton` or `SignInDrawerButton` for a complete sign-in control.

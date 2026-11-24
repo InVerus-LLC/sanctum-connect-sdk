@@ -2,9 +2,16 @@
  * Stable errors for React apps: the core SDK's codes plus the few this package adds. Messages are
  * for developers; `describeError` gives a plain sentence to show people.
  */
-import { PROVIDER_ERRORS, ProviderRpcError, SanctumConnectError, type ProviderRpcErrorCode, type SanctumConnectErrorCode } from "@inverus/connect";
+import {
+  PROVIDER_ERRORS,
+  ProviderRpcError,
+  SanctumConnectError,
+  type ProviderRpcErrorCode,
+  type SanctumConnectErrorCode,
+} from "@sanctum.ai/connect";
 
-export type SanctumReactErrorCode = SanctumConnectErrorCode
+export type SanctumReactErrorCode =
+  | SanctumConnectErrorCode
   /** The callback's sign-in isn't waiting in this tab: already completed, expired, replayed or from another tab. */
   | "transaction_missing"
   /** Used before discovery finished, outside a browser, or without a provider. */
@@ -23,7 +30,9 @@ export class SanctumReactError extends Error {
   static from(error: unknown): SanctumReactError {
     if (error instanceof SanctumReactError) return error;
     if (error instanceof SanctumConnectError) return new SanctumReactError(error.code, error.message, { cause: error });
-    return new SanctumReactError("unexpected", error instanceof Error ? error.message : "Unexpected failure", { cause: error });
+    return new SanctumReactError("unexpected", error instanceof Error ? error.message : "Unexpected failure", {
+      cause: error,
+    });
   }
 }
 
@@ -50,7 +59,8 @@ const WALLET_SENTENCES: Record<ProviderRpcErrorCode, string> = {
 };
 
 export function describeError(error: unknown): string {
-  if (error instanceof ProviderRpcError) return WALLET_SENTENCES[error.code] ?? WALLET_SENTENCES[PROVIDER_ERRORS.disconnected];
+  if (error instanceof ProviderRpcError)
+    return WALLET_SENTENCES[error.code] ?? WALLET_SENTENCES[PROVIDER_ERRORS.disconnected];
   const code = SanctumReactError.from(error).code;
   return SENTENCES[code] ?? "Sign-in couldn’t be completed. Try again.";
 }

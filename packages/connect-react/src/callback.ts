@@ -19,9 +19,7 @@ function withoutResponse(url: string): string {
 }
 
 export type CallbackState =
-  | { status: "working" }
-  | { status: "done"; session: SanctumSession }
-  | { status: "error"; error: SanctumReactError };
+  { status: "working" } | { status: "done"; session: SanctumSession } | { status: "error"; error: SanctumReactError };
 
 export function useSignInCallback(options: { onSignedIn?: (session: SanctumSession) => void } = {}): CallbackState {
   const { status, error: discoveryError, completeCallback } = useSanctum();
@@ -29,7 +27,9 @@ export function useSignInCallback(options: { onSignedIn?: (session: SanctumSessi
   const [url] = useState(() => (typeof window === "undefined" ? null : window.location.href));
   const [outcome, setOutcome] = useState<CallbackState | null>(null);
   const onSignedIn = useRef(options.onSignedIn);
-  useEffect(() => { onSignedIn.current = options.onSignedIn; });
+  useEffect(() => {
+    onSignedIn.current = options.onSignedIn;
+  });
 
   useEffect(() => {
     if (status !== "ready" || url === null) return;
@@ -41,9 +41,13 @@ export function useSignInCallback(options: { onSignedIn?: (session: SanctumSessi
         setOutcome({ status: "done", session });
         onSignedIn.current?.(session);
       },
-      (failure: unknown) => { if (active) setOutcome({ status: "error", error: SanctumReactError.from(failure) }); },
+      (failure: unknown) => {
+        if (active) setOutcome({ status: "error", error: SanctumReactError.from(failure) });
+      },
     );
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [status, url, completeCallback]);
 
   if (outcome) return outcome;
@@ -51,14 +55,31 @@ export function useSignInCallback(options: { onSignedIn?: (session: SanctumSessi
   return { status: "working" };
 }
 
-export function SignInCallback({ onSignedIn, className }: { onSignedIn?: (session: SanctumSession) => void; className?: string }) {
+export function SignInCallback({
+  onSignedIn,
+  className,
+}: {
+  onSignedIn?: (session: SanctumSession) => void;
+  className?: string;
+}) {
   const state = useSignInCallback(onSignedIn ? { onSignedIn } : {});
   const { signIn, pending } = useSignIn();
   const classes = className ? `sanctum-callback ${className}` : "sanctum-callback";
   if (state.status === "error") {
-    return h("div", { className: classes, "data-sanctum-callback": "error" },
+    return h(
+      "div",
+      { className: classes, "data-sanctum-callback": "error" },
       h("p", { role: "alert" }, describeError(state.error)),
-      h("button", { type: "button", className: "sanctum-button", disabled: pending, onClick: () => void signIn() }, "Start again"));
+      h(
+        "button",
+        { type: "button", className: "sanctum-button", disabled: pending, onClick: () => void signIn() },
+        "Start again",
+      ),
+    );
   }
-  return h("p", { className: classes, role: "status", "data-sanctum-callback": state.status }, state.status === "done" ? "Signed in." : "Finishing sign-in…");
+  return h(
+    "p",
+    { className: classes, role: "status", "data-sanctum-callback": state.status },
+    state.status === "done" ? "Signed in." : "Finishing sign-in…",
+  );
 }

@@ -26,19 +26,22 @@ export function useSignIn() {
     return () => window.removeEventListener("pageshow", restored);
   }, []);
 
-  const start = useCallback(async (options?: SignInOptions) => {
-    if (busy.current) return;
-    busy.current = true;
-    setPending(true);
-    setError(null);
-    try {
-      await signIn(options);
-    } catch (failure) {
-      busy.current = false;
-      setPending(false);
-      setError(SanctumReactError.from(failure));
-    }
-  }, [signIn]);
+  const start = useCallback(
+    async (options?: SignInOptions) => {
+      if (busy.current) return;
+      busy.current = true;
+      setPending(true);
+      setError(null);
+      try {
+        await signIn(options);
+      } catch (failure) {
+        busy.current = false;
+        setPending(false);
+        setError(SanctumReactError.from(failure));
+      }
+    },
+    [signIn],
+  );
 
   return { signIn: start, pending, error, ready: status === "ready" };
 }
@@ -55,12 +58,24 @@ export function SignInButton({ label = "Continue with Sanctum", className, promp
   const { status, error: discoveryError, retry } = useSanctum();
   const { signIn, pending, error, ready } = useSignIn();
   const shown = error ?? discoveryError;
-  return h("span", { className: "sanctum-sign-in" },
-    h("button", {
-      type: "button", className: className ? `sanctum-button ${className}` : "sanctum-button", disabled: !ready || pending,
-      "aria-busy": pending || status === "loading" ? true : undefined, onClick: () => void signIn(prompt ? { prompt } : undefined),
-    }, h(SanctumMark, { className: "sanctum-mark", width: 20, height: 20 }), h("span", null, label)),
+  return h(
+    "span",
+    { className: "sanctum-sign-in" },
+    h(
+      "button",
+      {
+        type: "button",
+        className: className ? `sanctum-button ${className}` : "sanctum-button",
+        disabled: !ready || pending,
+        "aria-busy": pending || status === "loading" ? true : undefined,
+        onClick: () => void signIn(prompt ? { prompt } : undefined),
+      },
+      h(SanctumMark, { className: "sanctum-mark", width: 20, height: 20 }),
+      h("span", null, label),
+    ),
     shown ? h("span", { className: "sanctum-error", role: "alert" }, describeError(shown)) : null,
-    status === "error" ? h("button", { type: "button", className: "sanctum-link-button", onClick: retry }, "Try again") : null,
+    status === "error"
+      ? h("button", { type: "button", className: "sanctum-link-button", onClick: retry }, "Try again")
+      : null,
   );
 }

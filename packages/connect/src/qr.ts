@@ -1,5 +1,5 @@
 /**
- * QR codes for Sanctum links (wallet pairing, agent claims): "@inverus/connect/qr". Encoding is
+ * QR codes for Sanctum links (wallet pairing, agent claims): "@sanctum.ai/connect/qr". Encoding is
  * uqr 0.1.3 (MIT; a port of Project Nayuki's QR Code generator), not Sanctum code, at error
  * correction level M.
  *  - `qrModules`: the module matrix (true = dark) without a quiet zone, for renderers that draw it
@@ -13,7 +13,8 @@ import { encode, renderUnicodeCompact } from "uqr";
 const MAX_LENGTH = 512;
 
 function checked(value: string): string {
-  if (typeof value !== "string" || value.length < 1 || value.length > MAX_LENGTH) throw new RangeError(`QR values are 1 to ${MAX_LENGTH} characters`);
+  if (typeof value !== "string" || value.length < 1 || value.length > MAX_LENGTH)
+    throw new RangeError(`QR values are 1 to ${MAX_LENGTH} characters`);
   return value;
 }
 

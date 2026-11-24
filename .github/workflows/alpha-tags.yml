@@ -1,5 +1,5 @@
-# Manual repair for npm assigning latest during first-package processing.
-name: Manual alpha distribution tags
+# Read-only verification: npm rejected removing latest from the initial alpha.
+name: Verify alpha distribution tags
 on:
   workflow_dispatch:
     inputs:
@@ -31,34 +31,18 @@ jobs:
         with:
           node-version-file: .nvmrc
           registry-url: https://registry.npmjs.org
-      - name: Remove only the unintended first-alpha latest tags
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+      - name: Verify published alpha tags without registry mutations
         run: |
           node --input-type=module <<'JS'
           import { execFileSync } from 'node:child_process';
-          const packages = ['@inverus/connect', '@inverus/connect-react'];
+          const packages = ['@sanctum.ai/connect', '@sanctum.ai/connect-react'];
           const version = '0.1.0-alpha.0';
-          const read = (name) => JSON.parse(execFileSync('npm', ['view', name, 'dist-tags', '--json', '--prefer-online'], { encoding: 'utf8' }));
-          const plans = packages.map((name) => ({ name, tags: read(name) }));
-          for (const { name, tags } of plans) {
+          for (const name of packages) {
+            const tags = JSON.parse(execFileSync('npm', ['view', name, 'dist-tags', '--json', '--prefer-online'], { encoding: 'utf8' }));
             if (tags.next !== version) throw new Error(`${name}: next is not the approved alpha`);
             if (tags.latest !== undefined && tags.latest !== version) {
-              throw new Error(`${name}: latest changed; refusing to remove another release`);
+              throw new Error(`${name}: latest identifies another release; review the expected tags`);
             }
-          }
-          for (const { name, tags } of plans) {
-            if (tags.latest === undefined) continue;
-            const current = read(name);
-            if (current.next !== version || current.latest !== version) {
-              throw new Error(`${name}: distribution tags changed after preflight`);
-            }
-            execFileSync('npm', ['dist-tag', 'rm', name, 'latest'], { stdio: 'inherit' });
-          }
-          for (const name of packages) {
-            const tags = read(name);
-            if (tags.next !== version || tags.latest !== undefined) {
-              throw new Error(`${name}: postflight tag verification failed`);
-            }
+            console.log(`${name}: next=${tags.next}, latest=${tags.latest ?? '(absent)'}; alpha, not a stable release`);
           }
           JS

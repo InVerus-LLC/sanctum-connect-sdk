@@ -24,17 +24,36 @@ export interface PackResult {
 /** `npm pack <stageDir> --pack-destination <dest>`, without running any lifecycle script. */
 export function pack(stageDir: string, destination: string): PackResult {
   const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-  const run = spawnSync(npm, ["pack", stageDir, "--pack-destination", destination, "--json", "--ignore-scripts"], { encoding: "utf8" });
+  const run = spawnSync(npm, ["pack", stageDir, "--pack-destination", destination, "--json", "--ignore-scripts"], {
+    encoding: "utf8",
+  });
   if (run.status !== 0) throw new Error(`npm pack ${stageDir} failed: ${run.stderr}`);
-  const [result] = JSON.parse(run.stdout) as { filename: string; name: string; version: string; size: number; unpackedSize: number; integrity: string; files: { path: string }[] }[];
+  const [result] = JSON.parse(run.stdout) as {
+    filename: string;
+    name: string;
+    version: string;
+    size: number;
+    unpackedSize: number;
+    integrity: string;
+    files: { path: string }[];
+  }[];
   if (!result) throw new Error(`npm pack ${stageDir} reported nothing`);
   return {
-    tarball: join(destination, result.filename), name: result.name, version: result.version, size: result.size, unpackedSize: result.unpackedSize,
-    integrity: result.integrity, listed: result.files.map((file) => file.path).sort(),
+    tarball: join(destination, result.filename),
+    name: result.name,
+    version: result.version,
+    size: result.size,
+    unpackedSize: result.unpackedSize,
+    integrity: result.integrity,
+    listed: result.files.map((file) => file.path).sort(),
   };
 }
 
-const text = (block: Buffer, start: number, length: number) => block.subarray(start, start + length).toString("utf8").replace(/\0.*$/su, "");
+const text = (block: Buffer, start: number, length: number) =>
+  block
+    .subarray(start, start + length)
+    .toString("utf8")
+    .replace(/\0.*$/su, "");
 
 /** The files in an npm tarball, keyed by their path inside the package. */
 export function readTarball(path: string): Map<string, Buffer> {
@@ -51,7 +70,8 @@ export function readTarball(path: string): Map<string, Buffer> {
     offset += 512 + Math.ceil(size / 512) * 512;
     if (type === "x" || type === "g" || type === "5") continue;
     if (type !== "0") throw new Error(`${path}: ${name} is not a regular file (type ${type})`);
-    if (!name.startsWith("package/") || name.split("/").includes("..")) throw new Error(`${path}: ${name} is outside the package`);
+    if (!name.startsWith("package/") || name.split("/").includes(".."))
+      throw new Error(`${path}: ${name} is outside the package`);
     files.set(name.slice("package/".length), Buffer.from(body));
   }
   return files;

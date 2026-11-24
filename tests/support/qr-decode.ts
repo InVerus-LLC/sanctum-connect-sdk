@@ -16,15 +16,17 @@ const SCALE = 4;
 export function rasterize(modules: boolean[][]): { pixels: Uint8ClampedArray; width: number } {
   const side = (modules.length + QUIET * 2) * SCALE;
   const pixels = new Uint8ClampedArray(side * side * 4).fill(255);
-  modules.forEach((row, y) => row.forEach((dark, x) => {
-    if (!dark) return;
-    for (let dy = 0; dy < SCALE; dy += 1) {
-      for (let dx = 0; dx < SCALE; dx += 1) {
-        const offset = (((y + QUIET) * SCALE + dy) * side + (x + QUIET) * SCALE + dx) * 4;
-        pixels[offset] = pixels[offset + 1] = pixels[offset + 2] = 0;
+  modules.forEach((row, y) =>
+    row.forEach((dark, x) => {
+      if (!dark) return;
+      for (let dy = 0; dy < SCALE; dy += 1) {
+        for (let dx = 0; dx < SCALE; dx += 1) {
+          const offset = (((y + QUIET) * SCALE + dy) * side + (x + QUIET) * SCALE + dx) * 4;
+          pixels[offset] = pixels[offset + 1] = pixels[offset + 2] = 0;
+        }
       }
-    }
-  }));
+    }),
+  );
   return { pixels, width: side };
 }
 

@@ -3,7 +3,7 @@
  * no token, code, pairing link or claim: only what happened, the pairwise subject and a typed error.
  * Listeners run synchronously; one that throws doesn't stop the others or the SDK.
  */
-import type { SignInHint } from "@inverus/connect";
+import type { SignInHint } from "@sanctum.ai/connect";
 import type { SanctumReactError } from "./errors.ts";
 
 export type SanctumEvent =
@@ -38,7 +38,9 @@ export function createEventHub(): SanctumEventHub {
     },
     subscribe(listener) {
       listeners.add(listener);
-      return () => { listeners.delete(listener); };
+      return () => {
+        listeners.delete(listener);
+      };
     },
   };
 }

@@ -1,15 +1,17 @@
 # Changelog
 
-Changes to `@inverus/connect`. Both Sanctum SDK packages use coordinated versions.
+Changes to `@sanctum.ai/connect`. Both Sanctum SDK packages use coordinated versions.
 Alpha APIs may change; review these notes before upgrading.
 
-## Unreleased
+## 0.1.0-alpha.0 — Sanctum namespace (24 November 2026)
 
 - Clarified installation, callback handling and cancellation documentation.
 - Expanded browser, Node.js and agent example setup and troubleshooting.
+- Migrated package identity and examples to `@sanctum.ai`; GitHub remains under InVerus-LLC.
+- Enforced ESLint, Prettier and the 299-line source limit.
 - Simplified public documentation and support links.
 
-## 0.1.0-alpha.0 — 23 November 2026
+## Earlier @inverus release — 0.1.0-alpha.0 (23 November 2026)
 
 First public alpha, published under `@inverus` with npm provenance.
 

@@ -13,14 +13,28 @@ import type { SignInKit } from "./sign-in-kit.ts";
 export function DrawerBrand({ kit }: { kit: SignInKit | null }) {
   const logo = kit?.branding?.logoUrl;
   if (!kit || !logo) return h("span", { className: "sanctum-drawer-mark" }, h(SanctumMark, { width: 24, height: 24 }));
-  return h("span", { className: "sanctum-drawer-mark" },
-    h("img", { src: logo, alt: kit.branding?.displayName ?? kit.appName, width: 24, height: 24, className: "sanctum-drawer-logo", referrerPolicy: "no-referrer", decoding: "async" }));
+  return h(
+    "span",
+    { className: "sanctum-drawer-mark" },
+    h("img", {
+      src: logo,
+      alt: kit.branding?.displayName ?? kit.appName,
+      width: 24,
+      height: 24,
+      className: "sanctum-drawer-logo",
+      referrerPolicy: "no-referrer",
+      decoding: "async",
+    }),
+  );
 }
 
 /** The app's accent under the header (decorative: hidden from assistive technology). */
 export function DrawerAccent({ kit }: { kit: SignInKit | null }) {
   const accent = kit?.branding?.accentColor;
   if (!accent) return null;
-  return h("svg", { className: "sanctum-drawer-accent", width: "100%", height: 4, "aria-hidden": true, focusable: false },
-    h("rect", { width: "100%", height: 4, rx: 2, fill: accent }));
+  return h(
+    "svg",
+    { className: "sanctum-drawer-accent", width: "100%", height: 4, "aria-hidden": true, focusable: false },
+    h("rect", { width: "100%", height: 4, rx: 2, fill: accent }),
+  );
 }

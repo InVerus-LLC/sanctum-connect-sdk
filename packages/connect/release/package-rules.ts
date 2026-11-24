@@ -34,7 +34,10 @@ const FORBIDDEN_PATH: [RegExp, string][] = [
   [/(^|\/)(tests?|__tests__|fixtures)\/|\.(test|spec)\.[cm]?[jt]sx?$/u, "a test file"],
   [/(?<!\.d)\.[cm]?tsx?$/u, "TypeScript source"],
   [/(^|\/)tsconfig[^/]*\.json$|\.tsbuildinfo$/u, "build configuration"],
-  [/(^|\/)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml)$|(^|\/)node_modules\//u, "a lockfile or node_modules"],
+  [
+    /(^|\/)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml)$|(^|\/)node_modules\//u,
+    "a lockfile or node_modules",
+  ],
 ];
 const SECRET: [RegExp, string][] = [
   [/-----BEGIN [A-Z ]*PRIVATE KEY-----/u, "a private key"],
@@ -48,7 +51,11 @@ const SECRET: [RegExp, string][] = [
 const PRE_RELEASE = /^0\.\d+\.\d+-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*$/u;
 
 type Manifest = Record<string, unknown> & {
-  name: string; version: string; exports: Record<string, string | Record<string, string>>; dependencies?: Record<string, string>; peerDependencies?: Record<string, string>;
+  name: string;
+  version: string;
+  exports: Record<string, string | Record<string, string>>;
+  dependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
 };
 
 export function checkFiles(files: Map<string, Buffer>): string[] {
@@ -66,19 +73,26 @@ export function checkFiles(files: Map<string, Buffer>): string[] {
 export function checkManifest(manifest: Manifest, files: Map<string, Buffer>, expected: PackageExpectation): string[] {
   const problems: string[] = [];
   const say = (problem: string) => problems.push(`package.json: ${problem}`);
-  if (manifest.name.startsWith("@inverus/") && Object.keys(manifest.dependencies ?? {}).some((name) => name.startsWith("@sanctum/"))) say("published packages cannot depend on private @sanctum workspaces");
+  if (Object.keys(manifest.dependencies ?? {}).some((name) => name.startsWith("@sanctum/")))
+    say("published packages cannot depend on private @sanctum workspaces");
   if (!PRE_RELEASE.test(manifest.version)) say(`version ${manifest.version} is not a 0.x pre-release`);
-  if (manifest.type !== "module") say("type must be \"module\"");
-  for (const field of ["files", "sideEffects", "license", "description", "engines"]) if (manifest[field] === undefined) say(`${field} is missing`);
-  for (const field of ["scripts", "devDependencies", "bundleDependencies", "bundledDependencies"]) if (manifest[field] !== undefined) say(`${field} must not be published`);
-  if (manifest.license === "UNLICENSED" && manifest.private !== true) say("UNLICENSED needs \"private\": true until the owner chooses a license");
+  if (manifest.type !== "module") say('type must be "module"');
+  for (const field of ["files", "sideEffects", "license", "description", "engines"])
+    if (manifest[field] === undefined) say(`${field} is missing`);
+  for (const field of ["scripts", "devDependencies", "bundleDependencies", "bundledDependencies"])
+    if (manifest[field] !== undefined) say(`${field} must not be published`);
+  if (manifest.license === "UNLICENSED" && manifest.private !== true)
+    say('UNLICENSED needs "private": true until the owner chooses a license');
   const keys = Object.keys(manifest.exports ?? {}).sort();
-  if (keys.join(",") !== [...expected.exports].sort().join(",")) say(`exports ${keys.join(", ")} differ from ${expected.exports.join(", ")}`);
+  if (keys.join(",") !== [...expected.exports].sort().join(","))
+    say(`exports ${keys.join(", ")} differ from ${expected.exports.join(", ")}`);
   for (const [key, target] of Object.entries(manifest.exports ?? {})) {
     const conditions = typeof target === "string" ? { file: target } : target;
-    if (typeof target !== "string" && Object.keys(target).join(",") !== "types,import") say(`export ${key} conditions must be types then import`);
+    if (typeof target !== "string" && Object.keys(target).join(",") !== "types,import")
+      say(`export ${key} conditions must be types then import`);
     for (const [condition, file] of Object.entries(conditions)) {
-      if (!files.has(posix.normalize(file))) say(`export ${key} (${condition}) points at ${file}, which is not in the tarball`);
+      if (!files.has(posix.normalize(file)))
+        say(`export ${key} (${condition}) points at ${file}, which is not in the tarball`);
       if (condition === "types" && !file.endsWith(".d.ts")) say(`export ${key} types is not a declaration file`);
       if (condition === "import" && !file.endsWith(".js")) say(`export ${key} import is not JavaScript`);
     }
@@ -87,16 +101,22 @@ export function checkManifest(manifest: Manifest, files: Map<string, Buffer>, ex
   for (const [name, range] of Object.entries(manifest.dependencies ?? {})) {
     if (/^(workspace|file|link|git|https?):/u.test(range)) say(`dependency ${name} uses ${range}`);
     const sibling = expected.siblings.get(name);
-    if ((name.startsWith("@sanctum/") || name.startsWith("@inverus/")) && sibling !== range) say(`dependency ${name}@${range} is not the packed sibling (${sibling ?? "none"})`);
-    if (sibling === undefined && !name.startsWith("@sanctum/") && !notices.includes(name)) say(`dependency ${name} is not named in THIRD_PARTY_NOTICES.md`);
-    if (sibling === undefined && !name.startsWith("@sanctum/") && !/^\d+\.\d+\.\d+$/u.test(range)) say(`dependency ${name}@${range} is not pinned exactly`);
+    if ((name.startsWith("@sanctum/") || name.startsWith("@sanctum.ai/")) && sibling !== range)
+      say(`dependency ${name}@${range} is not the packed sibling (${sibling ?? "none"})`);
+    if (sibling === undefined && !name.startsWith("@sanctum/") && !notices.includes(name))
+      say(`dependency ${name} is not named in THIRD_PARTY_NOTICES.md`);
+    if (sibling === undefined && !name.startsWith("@sanctum/") && !/^\d+\.\d+\.\d+$/u.test(range))
+      say(`dependency ${name}@${range} is not pinned exactly`);
   }
   return problems;
 }
 
 export function checkModules(manifest: Manifest, files: Map<string, Buffer>, expected: PackageExpectation): string[] {
   const problems: string[] = [];
-  const declared = new Set([...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.peerDependencies ?? {})]);
+  const declared = new Set([
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...Object.keys(manifest.peerDependencies ?? {}),
+  ]);
   for (const [path, body] of files) {
     if (!path.endsWith(".js") && !path.endsWith(".d.ts")) continue;
     const content = body.toString("utf8");
@@ -105,15 +125,22 @@ export function checkModules(manifest: Manifest, files: Map<string, Buffer>, exp
       if (specifier.startsWith(".")) {
         const target = posix.normalize(posix.join(posix.dirname(path), specifier));
         const candidates = path.endsWith(".d.ts") ? [target.replace(/\.js$/u, ".d.ts")] : [target];
-        if (!candidates.some((candidate) => files.has(candidate))) problems.push(`${path} imports ${specifier}, which is not in the tarball`);
+        if (!candidates.some((candidate) => files.has(candidate)))
+          problems.push(`${path} imports ${specifier}, which is not in the tarball`);
         continue;
       }
       const bare = specifier.startsWith("@") ? specifier.split("/").slice(0, 2).join("/") : specifier.split("/")[0]!;
-      if (!declared.has(bare)) problems.push(`${path} imports ${specifier}, which is not a declared dependency or peer`);
+      if (!declared.has(bare))
+        problems.push(`${path} imports ${specifier}, which is not a declared dependency or peer`);
     }
     if (path.endsWith(".js")) {
       const source = `${expected.sourceDir}/${posix.basename(path, ".js")}.ts`;
-      if (existsSync(source) && readFileSync(source, "utf8").startsWith("\"use client\";") && !content.startsWith("\"use client\";")) problems.push(`${path} lost "use client"`);
+      if (
+        existsSync(source) &&
+        readFileSync(source, "utf8").startsWith('"use client";') &&
+        !content.startsWith('"use client";')
+      )
+        problems.push(`${path} lost "use client"`);
       if (!files.has(`${path}.map`)) problems.push(`${path} has no source map`);
     }
   }
@@ -124,12 +151,17 @@ export function checkSourceMaps(files: Map<string, Buffer>): string[] {
   const problems: string[] = [];
   for (const [path, body] of files) {
     if (!path.endsWith(".map")) continue;
-    const map = JSON.parse(body.toString("utf8")) as { sourceRoot?: string; sources?: string[]; sourcesContent?: (string | null)[] };
+    const map = JSON.parse(body.toString("utf8")) as {
+      sourceRoot?: string;
+      sources?: string[];
+      sourcesContent?: (string | null)[];
+    };
     const sources = map.sources ?? [];
     if (sources.length === 0) problems.push(`${path} lists no sources`);
     sources.forEach((source, index) => {
       const joined = posix.join(posix.dirname(path), map.sourceRoot ?? "", source);
-      if (/^[a-z]+:|^\//iu.test(`${map.sourceRoot ?? ""}${source}`) || posix.normalize(joined).startsWith("..")) problems.push(`${path} points outside the package (${joined})`);
+      if (/^[a-z]+:|^\//iu.test(`${map.sourceRoot ?? ""}${source}`) || posix.normalize(joined).startsWith(".."))
+        problems.push(`${path} points outside the package (${joined})`);
       if (typeof map.sourcesContent?.[index] !== "string") problems.push(`${path} doesn't embed ${source}`);
     });
   }

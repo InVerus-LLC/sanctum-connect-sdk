@@ -25,20 +25,20 @@ from the **repository root**, not from this example's directory.
 
 Register a **public** client with these settings:
 
-| Setting | Value |
-| --- | --- |
-| Redirect URI | `http://127.0.0.1:5175/callback` |
-| Post-logout redirect URI | `http://127.0.0.1:5175/` |
-| Application origin | `http://127.0.0.1:5175` |
+| Setting                  | Value                            |
+| ------------------------ | -------------------------------- |
+| Redirect URI             | `http://127.0.0.1:5175/callback` |
+| Post-logout redirect URI | `http://127.0.0.1:5175/`         |
+| Application origin       | `http://127.0.0.1:5175`          |
 
 For the optional wallet example, also allow `eip155:84532` and `personal_sign` in
 the client's wallet kit.
 
-| Environment variable | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_SANCTUM_ISSUER` | Issuer origin, without a path or trailing slash |
-| `NEXT_PUBLIC_SANCTUM_CLIENT_ID` | Registered public client ID |
-| `NEXT_PUBLIC_SANCTUM_REDIRECT_URI` | Exact callback URL |
+| Environment variable               | Purpose                                         |
+| ---------------------------------- | ----------------------------------------------- |
+| `NEXT_PUBLIC_SANCTUM_ISSUER`       | Issuer origin, without a path or trailing slash |
+| `NEXT_PUBLIC_SANCTUM_CLIENT_ID`    | Registered public client ID                     |
+| `NEXT_PUBLIC_SANCTUM_REDIRECT_URI` | Exact callback URL                              |
 
 These values are public browser configuration. Never put a client secret in a
 `NEXT_PUBLIC_` variable. The example permits HTTP only on loopback hosts.
@@ -80,16 +80,16 @@ TypeScript workspace sources. Published packages already contain ESM JavaScript.
 
 ## Use in your own Next.js app
 
-Install `@inverus/connect@next` and `@inverus/connect-react@next`. Copy the provider
+Install `@sanctum.ai/connect@next` and `@sanctum.ai/connect-react@next`. Copy the provider
 and callback patterns into your own routes, use your registered URLs, and import
-`@inverus/connect-react/styles.css` from your root layout. The local consumer suite
+`@sanctum.ai/connect-react/styles.css` from your root layout. The local consumer suite
 checks the example's production build on Next.js 16.4.6.
 
 ## Troubleshooting
 
-| Symptom | Check |
-| --- | --- |
-| Callback rejected | The registered URL matches the environment value exactly. |
-| Configuration changes have no effect | Restart Next.js after editing environment variables. |
-| Session disappears on navigation | Keep one provider above both routes; use client navigation. |
-| Discovery fails | Use an available issuer origin, not the product landing page. |
+| Symptom                              | Check                                                         |
+| ------------------------------------ | ------------------------------------------------------------- |
+| Callback rejected                    | The registered URL matches the environment value exactly.     |
+| Configuration changes have no effect | Restart Next.js after editing environment variables.          |
+| Session disappears on navigation     | Keep one provider above both routes; use client navigation.   |
+| Discovery fails                      | Use an available issuer origin, not the product landing page. |

@@ -3,11 +3,11 @@
  * sessionStorage, one entry per `state`, taken once. Only the transaction (state, nonce, PKCE
  * verifier, redirect URI) is stored, never a token; entries expire after ten minutes.
  *
- * `completeSignIn` finishes a callback at most once per `state` in this page, so React's
+ * `completeSignIn` shares concurrent identical callbacks within one client and store, so React's
  * StrictMode double effects or two components on the callback page share one token exchange,
  * and a reloaded or replayed callback fails truthfully ("transaction_missing").
  */
-import type { SanctumConnect, SignInResult, SignInTransaction } from "@inverus/connect";
+import type { SanctumConnect, SignInResult, SignInTransaction } from "@sanctum.ai/connect";
 import { SanctumReactError } from "./errors.ts";
 
 export interface TransactionStore {
@@ -23,8 +23,13 @@ const STATE = /^[A-Za-z0-9_-]{16,128}$/u;
 function isTransaction(value: unknown): value is SignInTransaction {
   if (typeof value !== "object" || value === null) return false;
   const tx = value as Record<string, unknown>;
-  return typeof tx.state === "string" && typeof tx.nonce === "string" && typeof tx.codeVerifier === "string" && typeof tx.redirectUri === "string"
-    && (tx.maxAge === undefined || typeof tx.maxAge === "number");
+  return (
+    typeof tx.state === "string" &&
+    typeof tx.nonce === "string" &&
+    typeof tx.codeVerifier === "string" &&
+    typeof tx.redirectUri === "string" &&
+    (tx.maxAge === undefined || typeof tx.maxAge === "number")
+  );
 }
 
 /**
@@ -32,7 +37,8 @@ function isTransaction(value: unknown): value is SignInTransaction {
  * rendering, and never a server runtime's own storage). Pass `storage` and `now` only in tests.
  */
 export function sessionTransactionStore(given?: Storage, now: () => number = Date.now): TransactionStore {
-  const resolve = (): Storage | undefined => given ?? (typeof window === "undefined" ? undefined : window.sessionStorage);
+  const resolve = (): Storage | undefined =>
+    given ?? (typeof window === "undefined" ? undefined : window.sessionStorage);
   const purge = () => {
     const storage = resolve();
     if (!storage) return;
@@ -50,10 +56,17 @@ export function sessionTransactionStore(given?: Storage, now: () => number = Dat
   return {
     put(transaction) {
       const storage = resolve();
-      if (!storage) throw new SanctumReactError("not_ready", "Sign-in needs a browser tab (sessionStorage is unavailable)");
+      if (!storage)
+        throw new SanctumReactError("not_ready", "Sign-in needs a browser tab (sessionStorage is unavailable)");
       purge();
       const { state, nonce, codeVerifier, redirectUri, maxAge } = transaction;
-      storage.setItem(PREFIX + state, JSON.stringify({ at: now(), tx: { state, nonce, codeVerifier, redirectUri, ...(maxAge !== undefined ? { maxAge } : {}) } }));
+      storage.setItem(
+        PREFIX + state,
+        JSON.stringify({
+          at: now(),
+          tx: { state, nonce, codeVerifier, redirectUri, ...(maxAge !== undefined ? { maxAge } : {}) },
+        }),
+      );
     },
     take(state) {
       const storage = resolve();
@@ -63,7 +76,13 @@ export function sessionTransactionStore(given?: Storage, now: () => number = Dat
       if (raw === null) return null;
       try {
         const entry = JSON.parse(raw) as { at?: unknown; tx?: unknown };
-        if (typeof entry.at !== "number" || now() - entry.at > TTL_MS || !isTransaction(entry.tx) || entry.tx.state !== state) return null;
+        if (
+          typeof entry.at !== "number" ||
+          now() - entry.at > TTL_MS ||
+          !isTransaction(entry.tx) ||
+          entry.tx.state !== state
+        )
+          return null;
         return entry.tx;
       } catch {
         return null;
@@ -72,27 +91,53 @@ export function sessionTransactionStore(given?: Storage, now: () => number = Dat
   };
 }
 
-const inflight = new Map<string, Promise<SignInResult>>();
+type CallbackClient = Pick<SanctumConnect, "finishSignIn">;
+const inflight = new WeakMap<CallbackClient, WeakMap<TransactionStore, Map<string, Promise<SignInResult>>>>();
 
 /**
- * Finishes the sign-in a callback URL belongs to, once per `state` in this page. The stored
+ * Shares identical in-flight callbacks only within the same client and transaction store. The stored
  * transaction is consumed before the token exchange, so a failed exchange can't be retried with it.
  */
-export function completeSignIn(client: Pick<SanctumConnect, "finishSignIn">, store: TransactionStore, callback: string): Promise<SignInResult> {
-  let state: string | null = null;
+export function completeSignIn(
+  client: CallbackClient,
+  store: TransactionStore,
+  callback: string,
+): Promise<SignInResult> {
+  let state: string | null;
   try {
     state = new URL(callback).searchParams.get("state");
   } catch {
     state = null;
   }
   if (!state) return Promise.reject(new SanctumReactError("invalid_response", "The callback has no sign-in state"));
-  const running = inflight.get(state);
+  let stores = inflight.get(client);
+  if (!stores) {
+    stores = new WeakMap();
+    inflight.set(client, stores);
+  }
+  let pending = stores.get(store);
+  if (!pending) {
+    pending = new Map();
+    stores.set(store, pending);
+  }
+  const running = pending.get(callback);
   if (running) return running;
   const transaction = store.take(state);
-  if (!transaction) return Promise.reject(new SanctumReactError("transaction_missing", "This sign-in was already completed, expired, or started in another tab"));
-  const finishing = client.finishSignIn(callback, transaction).catch((error: unknown) => {
-    throw SanctumReactError.from(error);
-  });
-  inflight.set(state, finishing);
+  if (!transaction)
+    return Promise.reject(
+      new SanctumReactError(
+        "transaction_missing",
+        "This sign-in was already completed, expired, or started in another tab",
+      ),
+    );
+  const finishing = client
+    .finishSignIn(callback, transaction)
+    .catch((error: unknown) => {
+      throw SanctumReactError.from(error);
+    })
+    .finally(() => {
+      pending.delete(callback);
+    });
+  pending.set(callback, finishing);
   return finishing;
 }

@@ -1,6 +1,15 @@
 /** RFC 7523 workload grants. The workload assertion is not an OAuth client assertion. */
 import * as oauth from "oauth4webapi";
-import { http, loopbackOnly, narrowing, tokenAnswer, tokenOf, type AgentHttpOptions, type AgentToken, type DpopKeyPair } from "./agent-tokens.ts";
+import {
+  http,
+  loopbackOnly,
+  narrowing,
+  tokenAnswer,
+  tokenOf,
+  type AgentHttpOptions,
+  type AgentToken,
+  type DpopKeyPair,
+} from "./agent-tokens.ts";
 import { SanctumConnectError, throwIfAborted } from "./errors.ts";
 
 export const JWT_BEARER_GRANT = "urn:ietf:params:oauth:grant-type:jwt-bearer";
@@ -27,21 +36,40 @@ export interface WorkloadTokenRequest extends AgentHttpOptions {
 export async function requestWorkloadToken(request: WorkloadTokenRequest): Promise<AgentToken> {
   throwIfAborted(request.signal);
   const issuer = loopbackOnly(request.issuer, request, "The issuer");
-  if (issuer.origin !== request.issuer || issuer.username || issuer.password
-    || !/^agt_[A-Za-z0-9_-]{24,64}$/u.test(request.clientId)
-    || !request.workloadAssertion || request.workloadAssertion.length > 8192
-    || !request.grantId || !request.resource) {
-    throw new SanctumConnectError("configuration", "Workload requests require an issuer origin, agent client ID, bounded assertion, delegation and resource");
+  if (
+    issuer.origin !== request.issuer ||
+    issuer.username ||
+    issuer.password ||
+    !/^agt_[A-Za-z0-9_-]{24,64}$/u.test(request.clientId) ||
+    !request.workloadAssertion ||
+    request.workloadAssertion.length > 8192 ||
+    !request.grantId ||
+    !request.resource
+  ) {
+    throw new SanctumConnectError(
+      "configuration",
+      "Workload requests require an issuer origin, agent client ID, bounded assertion, delegation and resource",
+    );
   }
-  const client: oauth.Client = { client_id: request.clientId, ...(request.clockSkewSeconds ? { [oauth.clockSkew]: request.clockSkewSeconds } : {}) };
+  const client: oauth.Client = {
+    client_id: request.clientId,
+    ...(request.clockSkewSeconds ? { [oauth.clockSkew]: request.clockSkewSeconds } : {}),
+  };
   const as: oauth.AuthorizationServer = { issuer: issuer.origin, token_endpoint: `${issuer.origin}/token` };
   const parameters = new URLSearchParams({
-    client_id: request.clientId, assertion: request.workloadAssertion, grant_id: request.grantId, resource: request.resource,
+    client_id: request.clientId,
+    assertion: request.workloadAssertion,
+    grant_id: request.grantId,
+    resource: request.resource,
   });
   if (request.tools) parameters.set("authorization_details", narrowing(request.resource, request.tools));
   const options = http(request, request.dpop, client);
-  const answer = await tokenAnswer("The workload token request", Boolean(request.dpop), request.signal,
-    async () => oauth.processGenericTokenEndpointResponse(as, client,
-      await oauth.genericTokenEndpointRequest(as, client, oauth.None(), JWT_BEARER_GRANT, parameters, options)));
+  const answer = await tokenAnswer("The workload token request", Boolean(request.dpop), request.signal, async () =>
+    oauth.processGenericTokenEndpointResponse(
+      as,
+      client,
+      await oauth.genericTokenEndpointRequest(as, client, oauth.None(), JWT_BEARER_GRANT, parameters, options),
+    ),
+  );
   return tokenOf(answer);
 }

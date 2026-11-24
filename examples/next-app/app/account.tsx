@@ -4,7 +4,13 @@
  * session ended) and a Sanctum wallet session that signs "Hello Sanctum".
  */
 import { useState } from "react";
-import { describeError, SanctumWalletConnect, SignInDrawerButton, useSession, useWalletSession } from "@inverus/connect-react";
+import {
+  describeError,
+  SanctumWalletConnect,
+  SignInDrawerButton,
+  useSession,
+  useWalletSession,
+} from "@sanctum.ai/connect-react";
 
 const HELLO = "0x48656c6c6f2053616e6374756d";
 
@@ -25,11 +31,19 @@ export function Account() {
     <section aria-labelledby="account-title">
       <h2 id="account-title">Account</h2>
       <p data-subject={session.subject}>Signed in.</p>
-      <button type="button" className="sanctum-secondary-button" onClick={() => void signOut({ endSanctumSession: true, postLogoutRedirectUri: `${window.location.origin}/` })}>
+      <button
+        type="button"
+        className="sanctum-secondary-button"
+        onClick={() => void signOut({ endSanctumSession: true, postLogoutRedirectUri: `${window.location.origin}/` })}
+      >
         Sign out
       </button>
       <SanctumWalletConnect wallet={wallet} />
-      {wallet.state.status === "connected" ? <button type="button" className="sanctum-secondary-button" onClick={() => void sign()}>Sign “Hello Sanctum”</button> : null}
+      {wallet.state.status === "connected" ? (
+        <button type="button" className="sanctum-secondary-button" onClick={() => void sign()}>
+          Sign “Hello Sanctum”
+        </button>
+      ) : null}
       {result ? <p role="status">{result}</p> : null}
     </section>
   );

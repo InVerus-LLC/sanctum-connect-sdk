@@ -39,25 +39,47 @@ export interface AgentHttpOptions {
 }
 
 export interface AgentTokenRequest extends AgentHttpOptions {
-  issuer: string; auth: AgentAuthentication; resource: string;
+  issuer: string;
+  auth: AgentAuthentication;
+  resource: string;
   /** Binds the token to this key (DPoP). */
   dpop?: DpopKeyPair;
 }
 
-export interface AgentToken { accessToken: string; expiresIn: number; tokenType: "Bearer" | "DPoP" }
+export interface AgentToken {
+  accessToken: string;
+  expiresIn: number;
+  tokenType: "Bearer" | "DPoP";
+}
 
 /** Lower limits for a token-exchange sub-delegation (RFC 9396 §6.2); each must be within the delegation's. */
-export interface ExchangeLimits { calls?: number; spend?: { asset: string; amount: string }; recipients?: string[]; durationHours?: number }
+export interface ExchangeLimits {
+  calls?: number;
+  spend?: { asset: string; amount: string };
+  recipients?: string[];
+  durationHours?: number;
+}
 
 /** One `sanctum_delegation` authorization detail asking for less than the delegation allows. */
 export function narrowing(resource: string, tools: string[], limits: ExchangeLimits = {}): string {
-  const bounds = { ...(limits.calls !== undefined ? { calls: limits.calls } : {}), ...(limits.spend ? { spend: limits.spend } : {}) };
-  return JSON.stringify([{
-    type: "sanctum_delegation", locations: [resource], actions: tools, ...(Object.keys(bounds).length ? { limits: bounds } : {}),
-    ...(limits.recipients ? { recipients: limits.recipients } : {}), ...(limits.durationHours !== undefined ? { duration_hours: limits.durationHours } : {}),
-  }]);
+  const bounds = {
+    ...(limits.calls !== undefined ? { calls: limits.calls } : {}),
+    ...(limits.spend ? { spend: limits.spend } : {}),
+  };
+  return JSON.stringify([
+    {
+      type: "sanctum_delegation",
+      locations: [resource],
+      actions: tools,
+      ...(Object.keys(bounds).length ? { limits: bounds } : {}),
+      ...(limits.recipients ? { recipients: limits.recipients } : {}),
+      ...(limits.durationHours !== undefined ? { duration_hours: limits.durationHours } : {}),
+    },
+  ]);
 }
-export interface ExchangedAgentToken extends AgentToken { tools: string[] }
+export interface ExchangedAgentToken extends AgentToken {
+  tools: string[];
+}
 
 /** A DPoP key pair (ES256) for an agent runtime; the private key can't be exported. */
 export function createDpopKey(): Promise<DpopKeyPair> {
@@ -66,8 +88,14 @@ export function createDpopKey(): Promise<DpopKeyPair> {
 
 export function loopbackOnly(value: string, options: AgentHttpOptions, what: string): URL {
   const url = new URL(value);
-  if (url.protocol !== "https:" && !(options.allowInsecureLoopback && url.protocol === "http:" && LOOPBACK.has(url.hostname))) {
-    throw new SanctumConnectError("configuration", `${what} must use https (http only on loopback with allowInsecureLoopback)`);
+  if (
+    url.protocol !== "https:" &&
+    !(options.allowInsecureLoopback && url.protocol === "http:" && LOOPBACK.has(url.hostname))
+  ) {
+    throw new SanctumConnectError(
+      "configuration",
+      `${what} must use https (http only on loopback with allowInsecureLoopback)`,
+    );
   }
   return url;
 }
@@ -86,7 +114,12 @@ function dpopHandle(client: oauth.Client, key: DpopKeyPair): oauth.DPoPHandle {
 export function http(options: AgentHttpOptions, dpop: DpopKeyPair | undefined, client: oauth.Client) {
   const send = options.fetch;
   return {
-    ...(send ? { [oauth.customFetch]: (url: string, init: oauth.CustomFetchOptions<string, unknown>) => send(url, init as RequestInit) } : {}),
+    ...(send
+      ? {
+          [oauth.customFetch]: (url: string, init: oauth.CustomFetchOptions<string, unknown>) =>
+            send(url, init as RequestInit),
+        }
+      : {}),
     ...(options.allowInsecureLoopback ? { [oauth.allowInsecureRequests]: true as const } : {}),
     ...(dpop ? { DPoP: dpopHandle(client, dpop) } : {}),
     ...(options.signal ? { signal: options.signal } : {}),
@@ -107,42 +140,70 @@ function clientFor(options: AgentTokenRequest) {
   throwIfAborted(options.signal);
   const issuer = loopbackOnly(options.issuer, options, "The issuer");
   const auth = options.auth;
-  const client: oauth.Client = { client_id: "clientSecret" in auth ? auth.clientId : "agent", ...(options.clockSkewSeconds ? { [oauth.clockSkew]: options.clockSkewSeconds } : {}) };
-  const clientAuth: oauth.ClientAuth = "clientSecret" in auth ? oauth.ClientSecretBasic(auth.clientSecret) : (_as, _client, body) => {
-    body.set("client_assertion_type", JWT_BEARER);
-    body.set("client_assertion", auth.clientAssertion);
+  const client: oauth.Client = {
+    client_id: "clientSecret" in auth ? auth.clientId : "agent",
+    ...(options.clockSkewSeconds ? { [oauth.clockSkew]: options.clockSkewSeconds } : {}),
   };
+  const clientAuth: oauth.ClientAuth =
+    "clientSecret" in auth
+      ? oauth.ClientSecretBasic(auth.clientSecret)
+      : (_as, _client, body) => {
+          body.set("client_assertion_type", JWT_BEARER);
+          body.set("client_assertion", auth.clientAssertion);
+        };
   const as: oauth.AuthorizationServer = { issuer: issuer.origin, token_endpoint: `${issuer.origin}/token` };
   return { as, client, clientAuth, options: http(options, options.dpop, client) };
 }
 
-export async function tokenAnswer(what: string, dpop: boolean, signal: AbortSignal | undefined, run: () => Promise<oauth.TokenEndpointResponse>): Promise<oauth.TokenEndpointResponse> {
+export async function tokenAnswer(
+  what: string,
+  dpop: boolean,
+  signal: AbortSignal | undefined,
+  run: () => Promise<oauth.TokenEndpointResponse>,
+): Promise<oauth.TokenEndpointResponse> {
   let answer;
   try {
     answer = await withNonce(run);
   } catch (error) {
     const aborted = abortedBy(signal, error);
     if (aborted) throw aborted;
-    if (error instanceof oauth.ResponseBodyError) throw new SanctumConnectError("token_failed", `${what} was refused (${error.error_description ?? error.error})`, { cause: error });
+    if (error instanceof oauth.ResponseBodyError)
+      throw new SanctumConnectError("token_failed", `${what} was refused (${error.error_description ?? error.error})`, {
+        cause: error,
+      });
     throw new SanctumConnectError("token_failed", `${what} failed`, { cause: error });
   }
-  if (dpop && answer.token_type !== "dpop") throw new SanctumConnectError("token_failed", `${what} returned a token that isn't bound to the DPoP key`);
+  if (dpop && answer.token_type !== "dpop")
+    throw new SanctumConnectError("token_failed", `${what} returned a token that isn't bound to the DPoP key`);
   return answer;
 }
 
 export const tokenOf = (answer: oauth.TokenEndpointResponse): AgentToken => ({
-  accessToken: answer.access_token, expiresIn: Number(answer.expires_in ?? 0), tokenType: answer.token_type === "dpop" ? "DPoP" : "Bearer",
+  accessToken: answer.access_token,
+  expiresIn: Number(answer.expires_in ?? 0),
+  tokenType: answer.token_type === "dpop" ? "DPoP" : "Bearer",
 });
 
 /**
  * A token for the delegation `grantId` at `resource` (client credentials, Sanctum's agent profile).
  * `tools` limits this token to some of the delegation's tools (RFC 9396 §6.2).
  */
-export async function requestAgentToken(request: AgentTokenRequest & { grantId: string; tools?: string[] }): Promise<AgentToken> {
+export async function requestAgentToken(
+  request: AgentTokenRequest & { grantId: string; tools?: string[] },
+): Promise<AgentToken> {
   const { as, client, clientAuth, options } = clientFor(request);
-  const parameters = { resource: request.resource, grant_id: request.grantId, ...(request.tools ? { authorization_details: narrowing(request.resource, request.tools) } : {}) };
-  const answer = await tokenAnswer("The token request", Boolean(request.dpop), request.signal, async () => oauth.processClientCredentialsResponse(as, client,
-    await oauth.clientCredentialsGrantRequest(as, client, clientAuth, parameters, options)));
+  const parameters = {
+    resource: request.resource,
+    grant_id: request.grantId,
+    ...(request.tools ? { authorization_details: narrowing(request.resource, request.tools) } : {}),
+  };
+  const answer = await tokenAnswer("The token request", Boolean(request.dpop), request.signal, async () =>
+    oauth.processClientCredentialsResponse(
+      as,
+      client,
+      await oauth.clientCredentialsGrantRequest(as, client, clientAuth, parameters, options),
+    ),
+  );
   return tokenOf(answer);
 }
 
@@ -150,16 +211,35 @@ export async function requestAgentToken(request: AgentTokenRequest & { grantId: 
  * Token exchange (RFC 8693). `tools` narrows the sub-delegation to some tools; `limits` also lowers
  * its call or spend limit, recipients or life (sent as authorization_details, which needs `tools`).
  */
-export async function exchangeAgentToken(request: AgentTokenRequest & { subjectToken: string; tools?: string[]; limits?: ExchangeLimits }): Promise<ExchangedAgentToken> {
+export async function exchangeAgentToken(
+  request: AgentTokenRequest & { subjectToken: string; tools?: string[]; limits?: ExchangeLimits },
+): Promise<ExchangedAgentToken> {
   const { as, client, clientAuth, options } = clientFor(request);
-  if (request.limits && !request.tools) throw new SanctumConnectError("configuration", "Narrowing limits needs the tools to hand over");
-  const parameters = new URLSearchParams({ subject_token: request.subjectToken, subject_token_type: ACCESS_TOKEN_TYPE, resource: request.resource });
-  if (request.limits) parameters.set("authorization_details", narrowing(request.resource, request.tools!, request.limits));
+  if (request.limits && !request.tools)
+    throw new SanctumConnectError("configuration", "Narrowing limits needs the tools to hand over");
+  const parameters = new URLSearchParams({
+    subject_token: request.subjectToken,
+    subject_token_type: ACCESS_TOKEN_TYPE,
+    resource: request.resource,
+  });
+  if (request.limits)
+    parameters.set("authorization_details", narrowing(request.resource, request.tools!, request.limits));
   else if (request.tools) parameters.set("scope", request.tools.join(" "));
-  const answer = await tokenAnswer("Token exchange", Boolean(request.dpop), request.signal, async () => oauth.processGenericTokenEndpointResponse(as, client,
-    await oauth.genericTokenEndpointRequest(as, client, clientAuth, TOKEN_EXCHANGE_GRANT, parameters, options)));
-  if (answer.issued_token_type !== ACCESS_TOKEN_TYPE) throw new SanctumConnectError("token_failed", "Token exchange returned another kind of token");
-  return { ...tokenOf(answer), tools: String(answer.scope ?? "").split(" ").filter(Boolean) };
+  const answer = await tokenAnswer("Token exchange", Boolean(request.dpop), request.signal, async () =>
+    oauth.processGenericTokenEndpointResponse(
+      as,
+      client,
+      await oauth.genericTokenEndpointRequest(as, client, clientAuth, TOKEN_EXCHANGE_GRANT, parameters, options),
+    ),
+  );
+  if (answer.issued_token_type !== ACCESS_TOKEN_TYPE)
+    throw new SanctumConnectError("token_failed", "Token exchange returned another kind of token");
+  return {
+    ...tokenOf(answer),
+    tools: String(answer.scope ?? "")
+      .split(" ")
+      .filter(Boolean),
+  };
 }
 
 /**
@@ -167,15 +247,35 @@ export async function exchangeAgentToken(request: AgentTokenRequest & { subjectT
  * `Authorization: DPoP` with a fresh proof by `dpop` (required then). Returns the response,
  * including a 401 with its challenge.
  */
-export async function agentResourceRequest(request: AgentHttpOptions & {
-  token: AgentToken; dpop?: DpopKeyPair; method: string; url: string; headers?: Record<string, string>; body?: string;
-}): Promise<Response> {
-  if (request.token.tokenType === "DPoP" && !request.dpop) throw new SanctumConnectError("configuration", "A DPoP-bound token needs its DPoP key");
+export async function agentResourceRequest(
+  request: AgentHttpOptions & {
+    token: AgentToken;
+    dpop?: DpopKeyPair;
+    method: string;
+    url: string;
+    headers?: Record<string, string>;
+    body?: string;
+  },
+): Promise<Response> {
+  if (request.token.tokenType === "DPoP" && !request.dpop)
+    throw new SanctumConnectError("configuration", "A DPoP-bound token needs its DPoP key");
   const url = loopbackOnly(request.url, request, "The resource");
   throwIfAborted(request.signal);
-  const options = http(request, request.token.tokenType === "DPoP" ? request.dpop : undefined, { client_id: "agent", ...(request.clockSkewSeconds ? { [oauth.clockSkew]: request.clockSkewSeconds } : {}) });
+  const options = http(request, request.token.tokenType === "DPoP" ? request.dpop : undefined, {
+    client_id: "agent",
+    ...(request.clockSkewSeconds ? { [oauth.clockSkew]: request.clockSkewSeconds } : {}),
+  });
   try {
-    return await withNonce(() => oauth.protectedResourceRequest(request.token.accessToken, request.method, url, new Headers(request.headers), request.body ?? null, options));
+    return await withNonce(() =>
+      oauth.protectedResourceRequest(
+        request.token.accessToken,
+        request.method,
+        url,
+        new Headers(request.headers),
+        request.body ?? null,
+        options,
+      ),
+    );
   } catch (error) {
     if (error instanceof oauth.WWWAuthenticateChallengeError) return error.response;
     throw abortedBy(request.signal, error) ?? error;

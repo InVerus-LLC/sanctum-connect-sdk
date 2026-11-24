@@ -12,7 +12,9 @@ UI, credentials or customer data into it.
 - Sign-in, consent, delegation, wallet signing and spending stay separate.
 - Add meaningful regression tests for behavior changes and independently review
   authentication, token, cryptographic and release-security changes.
-- Run `npm run check` and isolated packed consumer verification before release.
+- Run `npm run check` (lint, formatting, line limits, types, tests, package checks)
+  and isolated packed consumer verification before release.
+- Format with Prettier; do not add lint suppressions, broad `any`, or disable checks.
   Record actual commands/results; local tests do not prove hosted acceptance.
 - Use only dev, uat and prod branches. No automatic CI/CD or scheduled jobs.
   Workflows use `workflow_dispatch` only. Publishing requires explicit owner

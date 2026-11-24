@@ -1,7 +1,8 @@
 # Manual SDK releases
 
 The owner authorized public MIT SDK source in
-`InVerus-LLC/sanctum-connect-sdk` and alpha publication under `@inverus`.
+`InVerus-LLC/sanctum-connect-sdk` and alpha publication under `@sanctum.ai`. The earlier `@inverus` release
+remains immutable; this is a new package identity, not an npm rename.
 No push, PR, tag or schedule triggers a workflow. The only trigger is
 `workflow_dispatch`, and the workflow only accepts the `dev` branch in this repo.
 This SDK policy does not promote the private service or deploy infrastructure.
@@ -16,10 +17,10 @@ Keep generated packages on the `next` tag. Never move an alpha to `latest`.
 ## Verify and review
 
 1. Install the pinned Node 26.13.1 toolchain and run `npm ci --ignore-scripts`.
-2. Run `npm run check`. Strict typechecks, unit tests and packed package checks
+2. Run `npm run check`. Lint, formatting, physical line limits, strict typechecks, unit tests and packed package checks
    must pass. No skipped or weakened security assertions.
 3. Run `npm run consumer -- <new outside-directory> --deps-from-workspace --next
-   --node <Node-22.15.1-executable>`. It installs packed SDKs outside the checkout,
+--node <Node-22.15.1-executable>`. It installs packed SDKs outside the checkout,
    checks declarations, browser bundles, ESM/SSR and Next.js prerendering.
 4. Independently review source, license notices, export boundaries and workflow.
    Record the exact reviewed commit SHA before dispatch.
@@ -62,13 +63,13 @@ signatures. Record publication and consumer results separately from local tests.
 npm may report an accepted upload before publish-time scanning makes it downloadable.
 Wait for the exact registry version; do not republish to work around a transient 404.
 Check distribution tags after processing: the first alpha publication was assigned
-both `next` and `latest` by the registry despite `--tag next`. The manual
-`alpha-tags.yml` repair is restricted to the two packages at `0.1.0-alpha.0`,
-requires an exact reviewed `dev` SHA, and refuses to remove a different release.
-It changes tag pointers only, never package versions or artifact bytes, and verifies
-the final registry state. Run it without concurrent external tag edits: npm offers
-no atomic compare-and-remove operation, so shared workflow concurrency cannot
-protect against a separate maintainer changing a tag between the read and removal.
+both `next` and `latest` by the registry despite `--tag next`. After enabling account
+2FA and completing interactive authentication, removal of `latest` was rejected
+with HTTP 400. Do not retry the old deletion flow or claim the alias is gone.
+The manual `alpha-tags.yml` workflow now verifies both packages without credentials
+or registry writes. It accepts the initial alias while explicitly reporting alpha
+status; it rejects tags that identify unexpected versions. See
+[npm CLI issue #8490](https://github.com/npm/cli/issues/8490) and
 [npm's publish-time scanning notice](https://github.blog/changelog/2026-07-28-npm-publish-time-malware-scanning-and-dual-use-metadata/).
 
 If one package publishes and the other fails, inspect the registry before retrying.

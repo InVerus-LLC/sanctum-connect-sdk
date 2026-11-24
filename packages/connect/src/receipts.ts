@@ -3,10 +3,21 @@ import { verifyReceipts, type ReceiptExport, type ReceiptVerification, type Veri
 import type { JSONWebKeySet } from "jose";
 
 export {
-  canonicalReceipt, GENESIS_HASH, parseReceipt, RECEIPT_CHECKPOINT_CLAIM,
-  RECEIPT_CHECKPOINT_TYP, RECEIPT_VERSION, receiptHash, verifyReceipts,
-  type ReceiptCheckpoint, type ReceiptExport, type ReceiptProblem, type ReceiptRecord,
-  type ReceiptValue, type ReceiptVerification, type VerifyOptions,
+  canonicalReceipt,
+  GENESIS_HASH,
+  parseReceipt,
+  RECEIPT_CHECKPOINT_CLAIM,
+  RECEIPT_CHECKPOINT_TYP,
+  RECEIPT_VERSION,
+  receiptHash,
+  verifyReceipts,
+  type ReceiptCheckpoint,
+  type ReceiptExport,
+  type ReceiptProblem,
+  type ReceiptRecord,
+  type ReceiptValue,
+  type ReceiptVerification,
+  type VerifyOptions,
 } from "./receipt-chain.ts";
 
 export interface SignedReceiptOptions {
@@ -30,11 +41,25 @@ function head(value: unknown): value is { seq: number; hash: string } {
   return record(value) && sequence(value.seq) && hash(value.hash);
 }
 function receiptExport(value: unknown): value is ReceiptExport {
-  return record(value) && value.version === 1 && typeof value.owner === "string" && value.owner.length > 0
-    && head(value.head) && (value.next === null || sequence(value.next))
-    && (value.checkpoint === null || typeof value.checkpoint === "string")
-    && Array.isArray(value.receipts) && value.receipts.every((receipt: unknown) => record(receipt)
-      && sequence(receipt.seq) && receipt.seq > 0 && hash(receipt.prevHash) && hash(receipt.hash) && typeof receipt.body === "string");
+  return (
+    record(value) &&
+    value.version === 1 &&
+    typeof value.owner === "string" &&
+    value.owner.length > 0 &&
+    head(value.head) &&
+    (value.next === null || sequence(value.next)) &&
+    (value.checkpoint === null || typeof value.checkpoint === "string") &&
+    Array.isArray(value.receipts) &&
+    value.receipts.every(
+      (receipt: unknown) =>
+        record(receipt) &&
+        sequence(receipt.seq) &&
+        receipt.seq > 0 &&
+        hash(receipt.prevHash) &&
+        hash(receipt.hash) &&
+        typeof receipt.body === "string",
+    )
+  );
 }
 
 /**
@@ -44,15 +69,27 @@ function receiptExport(value: unknown): value is ReceiptExport {
  * prove freshness or current authorization; compare with a separately retained head for rollback.
  * Apply download/body-size limits before parsing large exports.
  */
-export async function verifySignedReceipts(value: unknown, options: SignedReceiptOptions): Promise<ReceiptVerification> {
+export async function verifySignedReceipts(
+  value: unknown,
+  options: SignedReceiptOptions,
+): Promise<ReceiptVerification> {
   if (!receiptExport(value)) return { valid: false, problem: "body_invalid", seq: null };
-  if (!options.issuer || !options.owner || !options.keys || !Array.isArray(options.keys.keys) || options.keys.keys.length === 0
-    || (options.from !== undefined && !head(options.from)) || (options.anchor !== undefined && !head(options.anchor))) {
+  if (
+    !options.issuer ||
+    !options.owner ||
+    !options.keys ||
+    !Array.isArray(options.keys.keys) ||
+    options.keys.keys.length === 0 ||
+    (options.from !== undefined && !head(options.from)) ||
+    (options.anchor !== undefined && !head(options.anchor))
+  ) {
     return { valid: false, problem: "checkpoint_invalid", seq: null };
   }
   if (value.owner !== options.owner) return { valid: false, problem: "owner_mismatch", seq: null };
   return verifyReceipts(value, {
-    keys: options.keys, issuer: options.issuer,
-    ...(options.from ? { from: options.from } : {}), ...(options.anchor ? { anchor: options.anchor } : {}),
+    keys: options.keys,
+    issuer: options.issuer,
+    ...(options.from ? { from: options.from } : {}),
+    ...(options.anchor ? { anchor: options.anchor } : {}),
   });
 }

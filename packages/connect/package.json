@@ -1,5 +1,5 @@
 {
-  "name": "@inverus/connect",
+  "name": "@sanctum.ai/connect",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -58,7 +58,7 @@
       "access": "public",
       "provenance": true
     },
-    "name": "@inverus/connect",
+    "name": "@sanctum.ai/connect",
     "repository": {
       "type": "git",
       "url": "git+https://github.com/InVerus-LLC/sanctum-connect-sdk.git",
@@ -69,11 +69,10 @@
       "url": "https://github.com/InVerus-LLC/sanctum-connect-sdk/issues"
     },
     "author": {
-      "name": "inVerus"
+      "name": "Sanctum"
     },
     "keywords": [
       "sanctum",
-      "inverus",
       "authentication",
       "openid-connect",
       "oauth2",

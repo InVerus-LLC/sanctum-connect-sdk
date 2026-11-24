@@ -4,7 +4,7 @@
  * generated or injected and no inline style is used, so it works under a strict CSP.
  */
 import { createElement as h, useMemo } from "react";
-import { qrModules } from "@inverus/connect/qr";
+import { qrModules } from "@sanctum.ai/connect/qr";
 
 const QUIET = 4;
 
@@ -22,12 +22,33 @@ export function qrPath(modules: boolean[][]): string {
   return parts.join("");
 }
 
-export function SanctumQrCode({ value, label, size = 192, className }: { value: string; label: string; size?: number; className?: string }) {
+export function SanctumQrCode({
+  value,
+  label,
+  size = 192,
+  className,
+}: {
+  value: string;
+  label: string;
+  size?: number;
+  className?: string;
+}) {
   const modules = useMemo(() => qrModules(value), [value]);
   const side = modules.length + QUIET * 2;
   const path = useMemo(() => qrPath(modules), [modules]);
-  return h("svg", {
-    role: "img", "aria-label": label, viewBox: `0 0 ${side} ${side}`, width: size, height: size, shapeRendering: "crispEdges",
-    className: className ? `sanctum-qr ${className}` : "sanctum-qr", "data-sanctum-qr": "",
-  }, h("rect", { width: side, height: side, fill: "#ffffff" }), h("path", { d: path, fill: "#000000" }));
+  return h(
+    "svg",
+    {
+      role: "img",
+      "aria-label": label,
+      viewBox: `0 0 ${side} ${side}`,
+      width: size,
+      height: size,
+      shapeRendering: "crispEdges",
+      className: className ? `sanctum-qr ${className}` : "sanctum-qr",
+      "data-sanctum-qr": "",
+    },
+    h("rect", { width: side, height: side, fill: "#ffffff" }),
+    h("path", { d: path, fill: "#000000" }),
+  );
 }

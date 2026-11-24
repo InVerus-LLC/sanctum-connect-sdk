@@ -1,6 +1,6 @@
 /**
- * Checks the distributable SDKs as a registry would receive them (W-16): builds @inverus/connect and
- * @inverus/connect-react into a fresh temporary directory (packages/connect/release/build-sdk.ts),
+ * Checks the distributable SDKs as a registry would receive them (W-16): builds @sanctum.ai/connect and
+ * @sanctum.ai/connect-react into a fresh temporary directory (packages/connect/release/build-sdk.ts),
  * packs each with `npm pack` (never publish), reads the tarballs back and checks them with
  * packages/connect/release/package-rules.ts: required documents, no tests, sources, keys, tokens or
  * local paths, a deliberate manifest, resolvable modules and self-contained source maps.
@@ -34,21 +34,21 @@ const PACKAGES = [
 
 /** Gzip budgets (bytes) per entry point: the whole minified bundle an app ships for it, React excluded. */
 const BUDGETS: Record<string, number> = {
-  "@inverus/connect": 18_700, // measured 16,255 (includes oauth4webapi)
-  "@inverus/connect/wallets": 1_400, // measured 1,198
-  "@inverus/connect/qr": 4_800, // measured 4,169 (includes uqr)
-  "@inverus/connect/workloads": 8_000, // Initial workload entry: measured 7,338 B (~9% headroom).
-  "@inverus/connect/receipts": 7_200, // Initial receipt entry: measured 6,194 B + ~16% headroom.
-  "@inverus/connect-react": 31_800, // measured 27,657 (includes @inverus/connect, oauth4webapi, uqr)
-  "@inverus/connect-react/styles.css": 2_300, // measured 1,968
+  "@sanctum.ai/connect": 18_700, // measured 16,255 (includes oauth4webapi)
+  "@sanctum.ai/connect/wallets": 1_400, // measured 1,198
+  "@sanctum.ai/connect/qr": 4_800, // measured 4,169 (includes uqr)
+  "@sanctum.ai/connect/workloads": 8_000, // Initial workload entry: measured 7,338 B (~9% headroom).
+  "@sanctum.ai/connect/receipts": 7_200, // Initial receipt entry: measured 6,194 B + ~16% headroom.
+  "@sanctum.ai/connect-react": 31_800, // measured 27,657 (includes @sanctum.ai/connect, oauth4webapi, uqr)
+  "@sanctum.ai/connect-react/styles.css": 2_300, // measured 1,968
 };
 /** Packages an entry point must never pull in. */
 const MUST_NOT_INCLUDE: Record<string, string[]> = {
-  "@inverus/connect": ["uqr", "jose"],
-  "@inverus/connect/receipts": ["oauth4webapi", "uqr", "pg"],
-  "@inverus/connect/workloads": ["jose", "uqr", "pg"],
-  "@inverus/connect/wallets": ["oauth4webapi", "uqr"],
-  "@inverus/connect/qr": ["oauth4webapi"],
+  "@sanctum.ai/connect": ["uqr", "jose"],
+  "@sanctum.ai/connect/receipts": ["oauth4webapi", "uqr", "pg"],
+  "@sanctum.ai/connect/workloads": ["jose", "uqr", "pg"],
+  "@sanctum.ai/connect/wallets": ["oauth4webapi", "uqr"],
+  "@sanctum.ai/connect/qr": ["oauth4webapi"],
 };
 
 const flag = process.argv.indexOf("--pack-destination");
@@ -58,21 +58,35 @@ mkdirSync(destination, { recursive: true });
 const problems: string[] = [];
 
 try {
-  const built = spawnSync(process.execPath, [join(ROOT, "packages/connect/release/build-sdk.ts"), "--out", join(work, "stage")], { cwd: ROOT, encoding: "utf8" });
+  const built = spawnSync(
+    process.execPath,
+    [join(ROOT, "packages/connect/release/build-sdk.ts"), "--out", join(work, "stage")],
+    { cwd: ROOT, encoding: "utf8" },
+  );
   if (built.status !== 0) throw new Error(`the SDK build failed:\n${built.stdout}${built.stderr}`);
 
   const packed = PACKAGES.map((entry) => {
     const result = pack(join(work, "stage", entry.stage), destination);
     const files = readTarball(result.tarball);
-    return { entry, result, files, manifest: JSON.parse(files.get("package.json")!.toString("utf8")) as Parameters<typeof checkManifest>[0] };
+    return {
+      entry,
+      result,
+      files,
+      manifest: JSON.parse(files.get("package.json")!.toString("utf8")) as Parameters<typeof checkManifest>[0],
+    };
   });
   const siblings = new Map(packed.map(({ manifest }) => [manifest.name, manifest.version]));
 
   for (const { entry, result, files, manifest } of packed) {
     const expected = { exports: [...entry.exports], sourceDir: join(ROOT, entry.dir, "src"), siblings };
     const found = [
-      ...checkFiles(files), ...checkManifest(manifest, files, expected), ...checkModules(manifest, files, expected), ...checkSourceMaps(files),
-      ...(result.listed.join("\n") === [...files.keys()].sort().join("\n") ? [] : ["npm's file list differs from the tarball's contents"]),
+      ...checkFiles(files),
+      ...checkManifest(manifest, files, expected),
+      ...checkModules(manifest, files, expected),
+      ...checkSourceMaps(files),
+      ...(result.listed.join("\n") === [...files.keys()].sort().join("\n")
+        ? []
+        : ["npm's file list differs from the tarball's contents"]),
     ];
     problems.push(...found.map((problem) => `${manifest.name}: ${problem}`));
     // Installed as a consumer sees it: node_modules/<name>/…
@@ -92,16 +106,30 @@ try {
         code = readFileSync(join(work, "consumer", "node_modules", manifest.name, String(manifest.exports[key])));
       } else {
         const bundled = await build({
-          stdin: { contents: `export * from ${JSON.stringify(specifier)};`, resolveDir: join(work, "consumer"), loader: "js" },
-          bundle: true, minify: true, format: "esm", platform: "browser", target: "es2022", write: false, metafile: true, logLevel: "silent",
-          external: ["react", "react-dom", "react/jsx-runtime"], nodePaths: [join(ROOT, "node_modules")],
+          stdin: {
+            contents: `export * from ${JSON.stringify(specifier)};`,
+            resolveDir: join(work, "consumer"),
+            loader: "js",
+          },
+          bundle: true,
+          minify: true,
+          format: "esm",
+          platform: "browser",
+          target: "es2022",
+          write: false,
+          metafile: true,
+          logLevel: "silent",
+          external: ["react", "react-dom", "react/jsx-runtime"],
+          nodePaths: [join(ROOT, "node_modules")],
         });
         code = Buffer.from(bundled.outputFiles[0]!.contents);
         const inputs = Object.keys(bundled.metafile.inputs);
         for (const forbidden of MUST_NOT_INCLUDE[specifier] ?? []) {
-          if (inputs.some((input) => input.includes(`node_modules/${forbidden}/`))) problems.push(`${specifier} pulls in ${forbidden}`);
+          if (inputs.some((input) => input.includes(`node_modules/${forbidden}/`)))
+            problems.push(`${specifier} pulls in ${forbidden}`);
         }
-        if (inputs.some((input) => input.includes("/src/") && input.endsWith(".ts"))) problems.push(`${specifier} bundled TypeScript source`);
+        if (inputs.some((input) => input.includes("/src/") && input.endsWith(".ts")))
+          problems.push(`${specifier} bundled TypeScript source`);
       }
       const gzip = gzipSync(code, { level: 9 }).length;
       const budget = BUDGETS[specifier] ?? 0;
@@ -113,9 +141,13 @@ try {
   console.log("SDK tarballs (npm pack):");
   for (const { result, files } of packed) console.log(`  ${describe(result)}; ${files.size} files`);
   console.log("Entry points (minified ESM bundle, React external; gzip level 9):");
-  for (const size of sizes) console.log(`  ${size.entry.padEnd(36)} ${String(size.bytes).padStart(7)} B  ${String(size.gzip).padStart(6)} B gzip  (budget ${size.budget})`);
+  for (const size of sizes)
+    console.log(
+      `  ${size.entry.padEnd(36)} ${String(size.bytes).padStart(7)} B  ${String(size.gzip).padStart(6)} B gzip  (budget ${size.budget})`,
+    );
   for (const { manifest } of packed) {
-    if (manifest.license === "UNLICENSED") console.log(`  publication lock: ${manifest.name} is UNLICENSED and private until the owner chooses a license`);
+    if (manifest.license === "UNLICENSED")
+      console.log(`  publication lock: ${manifest.name} is UNLICENSED and private until the owner chooses a license`);
   }
   if (flag >= 0) console.log(`Tarballs kept in ${destination}`);
 } catch (error) {
@@ -129,7 +161,9 @@ function describe(result: PackResult): string {
 }
 
 if (problems.length) {
-  console.error(`SDK package check failed (${problems.length}):\n${problems.map((problem) => `  ${problem}`).join("\n")}`);
+  console.error(
+    `SDK package check failed (${problems.length}):\n${problems.map((problem) => `  ${problem}`).join("\n")}`,
+  );
   process.exitCode = 1;
 } else {
   console.log("SDK package check passed.");

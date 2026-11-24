@@ -17,7 +17,16 @@ test("consumer setup never replaces existing data and only creates a new outside
     const sentinel = join(occupied, "keep.txt");
     writeFileSync(sentinel, "keep me");
     symlinkSync(repo, join(scratch, "repo-link"));
-    for (const target of [undefined, "", scratch, repo, occupied, join(repo, "..scratch"), join(repo, "child"), join(scratch, "repo-link", "child")]) {
+    for (const target of [
+      undefined,
+      "",
+      scratch,
+      repo,
+      occupied,
+      join(repo, "..scratch"),
+      join(repo, "child"),
+      join(scratch, "repo-link", "child"),
+    ]) {
       assert.throws(() => createConsumerDirectory(target, repo), String(target));
       assert.equal(readFileSync(sentinel, "utf8"), "keep me");
     }

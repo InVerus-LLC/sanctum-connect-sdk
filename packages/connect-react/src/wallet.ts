@@ -14,8 +14,14 @@
  */
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import {
-  connectSanctumWallet, ProviderRpcError, resumeSanctumWallet, sanctumTransport, type SanctumWalletProvider, type WalletSessionMethod, type WalletSessionStore,
-} from "@inverus/connect";
+  connectSanctumWallet,
+  ProviderRpcError,
+  resumeSanctumWallet,
+  sanctumTransport,
+  type SanctumWalletProvider,
+  type WalletSessionMethod,
+  type WalletSessionStore,
+} from "@sanctum.ai/connect";
 import { describeError } from "./errors.ts";
 import { useSanctum } from "./provider.ts";
 
@@ -40,7 +46,15 @@ export type WalletAction =
   | { type: "connected" | "resumed"; attempt: number; accounts: string[]; chainId: string }
   | { type: "rejected" | "failed" | "ended"; attempt: number; message: string };
 
-export const initialWalletState: WalletState = { status: "idle", attempt: 0, pairingUri: null, pairingExpiresAt: null, accounts: [], chainId: null, error: null };
+export const initialWalletState: WalletState = {
+  status: "idle",
+  attempt: 0,
+  pairingUri: null,
+  pairingExpiresAt: null,
+  accounts: [],
+  chainId: null,
+  error: null,
+};
 
 /** Pure transitions; actions for any attempt but the current one are ignored. */
 export function walletReducer(state: WalletState, action: WalletAction): WalletState {
@@ -51,16 +65,32 @@ export function walletReducer(state: WalletState, action: WalletAction): WalletS
   if (action.attempt !== state.attempt) return state;
   switch (action.type) {
     case "paired":
-      return state.status === "proposing" ? { ...state, status: "awaiting_approval", pairingUri: action.pairingUri, pairingExpiresAt: action.expiresAt } : state;
+      return state.status === "proposing"
+        ? { ...state, status: "awaiting_approval", pairingUri: action.pairingUri, pairingExpiresAt: action.expiresAt }
+        : state;
     case "connected":
     case "resumed":
-      return state.status === (action.type === "resumed" ? "idle" : "proposing") || (action.type === "connected" && state.status === "awaiting_approval")
-        ? { ...state, status: "connected", pairingUri: null, pairingExpiresAt: null, accounts: [...action.accounts], chainId: action.chainId, error: null } : state;
+      return state.status === (action.type === "resumed" ? "idle" : "proposing") ||
+        (action.type === "connected" && state.status === "awaiting_approval")
+        ? {
+            ...state,
+            status: "connected",
+            pairingUri: null,
+            pairingExpiresAt: null,
+            accounts: [...action.accounts],
+            chainId: action.chainId,
+            error: null,
+          }
+        : state;
     case "ended":
-      return state.status === "connected" ? { ...initialWalletState, attempt: state.attempt, error: action.message } : state;
+      return state.status === "connected"
+        ? { ...initialWalletState, attempt: state.attempt, error: action.message }
+        : state;
     case "rejected":
     case "failed":
-      return state.status === "connected" ? state : { ...state, status: action.type, pairingUri: null, pairingExpiresAt: null, error: action.message };
+      return state.status === "connected"
+        ? state
+        : { ...state, status: action.type, pairingUri: null, pairingExpiresAt: null, error: action.message };
   }
 }
 
@@ -84,9 +114,17 @@ export function useWalletSession({ chains, methods, pollMs, store, storeKey }: W
   const held = useRef<SanctumWalletProvider | null>(null);
   const lifetime = useRef<AbortController | null>(null);
   const wanted = useRef({ chains, methods });
-  useEffect(() => { wanted.current = { chains, methods }; });
-  const transport = useMemo(() => sanctumTransport({ issuer: config.issuer, clientId: config.clientId }), [config.issuer, config.clientId]);
-  const remembering = useMemo(() => ({ ...(store ? { store } : {}), ...(storeKey ? { storeKey } : {}), ...(pollMs ? { pollMs } : {}) }), [store, storeKey, pollMs]);
+  useEffect(() => {
+    wanted.current = { chains, methods };
+  });
+  const transport = useMemo(
+    () => sanctumTransport({ issuer: config.issuer, clientId: config.clientId }),
+    [config.issuer, config.clientId],
+  );
+  const remembering = useMemo(
+    () => ({ ...(store ? { store } : {}), ...(storeKey ? { storeKey } : {}), ...(pollMs ? { pollMs } : {}) }),
+    [store, storeKey, pollMs],
+  );
   const unlisten = useRef<(() => void) | null>(null);
 
   /** Holds a connected provider and returns to idle when its session ends. */
@@ -119,12 +157,15 @@ export function useWalletSession({ chains, methods, pollMs, store, storeKey }: W
     if (store) {
       const attempt = (attempts.current += 1);
       dispatch({ type: "reset", attempt });
-      resumeSanctumWallet({ transport, signal: alive.signal, ...remembering }).then((provider) => {
-        if (!provider) return;
-        if (alive.signal.aborted || attempts.current !== attempt) return;
-        hold(provider, attempt);
-        dispatch({ type: "resumed", attempt, accounts: provider.accounts, chainId: provider.chainId });
-      }, () => undefined);
+      resumeSanctumWallet({ transport, signal: alive.signal, ...remembering }).then(
+        (provider) => {
+          if (!provider) return;
+          if (alive.signal.aborted || attempts.current !== attempt) return;
+          hold(provider, attempt);
+          dispatch({ type: "resumed", attempt, accounts: provider.accounts, chainId: provider.chainId });
+        },
+        () => undefined,
+      );
     }
     return () => {
       alive.abort();
@@ -145,7 +186,11 @@ export function useWalletSession({ chains, methods, pollMs, store, storeKey }: W
     dispatch({ type: "start", attempt });
     try {
       const provider = await connectSanctumWallet({
-        transport, chains: wanted.current.chains, methods: wanted.current.methods, signal: abort.signal, ...remembering,
+        transport,
+        chains: wanted.current.chains,
+        methods: wanted.current.methods,
+        signal: abort.signal,
+        ...remembering,
         onPairingUri: (pairingUri, expiresAt) => dispatch({ type: "paired", attempt, pairingUri, expiresAt }),
       });
       if (abort.signal.aborted || attempts.current !== attempt) {
@@ -159,7 +204,11 @@ export function useWalletSession({ chains, methods, pollMs, store, storeKey }: W
       if (abort.signal.aborted) return;
       pending.current = null;
       const rejected = failure instanceof ProviderRpcError && failure.code === 4001;
-      dispatch({ type: rejected ? "rejected" : "failed", attempt, message: rejected ? "The connection was declined or expired." : describeError(failure) });
+      dispatch({
+        type: rejected ? "rejected" : "failed",
+        attempt,
+        message: rejected ? "The connection was declined or expired." : describeError(failure),
+      });
     }
   }, [transport, remembering, release, hold]);
 
@@ -176,7 +225,11 @@ export function useWalletSession({ chains, methods, pollMs, store, storeKey }: W
     try {
       return await provider.request(args, lifetime.current?.signal);
     } catch (failure) {
-      if (failure instanceof ProviderRpcError && (failure.code === 4900 || failure.reason === "session_inactive") && held.current === provider) {
+      if (
+        failure instanceof ProviderRpcError &&
+        (failure.code === 4900 || failure.reason === "session_inactive") &&
+        held.current === provider
+      ) {
         held.current = null;
         unlisten.current?.();
         dispatch({ type: "reset", attempt: (attempts.current += 1) });

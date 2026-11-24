@@ -1,0 +1,85 @@
+/*
+ * @sanctum/connect-react default styles. Every rule is scoped to .sanctum-* classes and reads the
+ * theme's custom properties (see themeCss). Motion respects reduced-motion preferences; primary targets are at least 44px tall.
+ */
+.sanctum-sign-in,
+.sanctum-wallet,
+.sanctum-callback {
+  font-family: var(--sanctum-font, system-ui, -apple-system, "Segoe UI", sans-serif);
+  color: var(--sanctum-text, #0f172a);
+}
+.sanctum-sign-in {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.sanctum-button,
+.sanctum-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: var(--sanctum-radius, 12px);
+  font-family: var(--sanctum-font, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.sanctum-button {
+  border: 0;
+  background: var(--sanctum-accent, #2563eb);
+  color: var(--sanctum-accent-text, #ffffff);
+}
+.sanctum-secondary-button {
+  border: 1px solid var(--sanctum-border, #7c899c);
+  background: var(--sanctum-surface, #ffffff);
+  color: var(--sanctum-text, #0f172a);
+}
+.sanctum-button:disabled,
+.sanctum-secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.sanctum-button:focus-visible,
+.sanctum-secondary-button:focus-visible,
+.sanctum-link-button:focus-visible {
+  outline: 2px solid var(--sanctum-focus-ring, #2563eb);
+  outline-offset: 2px;
+}
+.sanctum-mark {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.sanctum-link-button {
+  border: 0;
+  background: none;
+  padding: 0;
+  min-height: 24px;
+  font: inherit;
+  color: var(--sanctum-accent, #2563eb);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.sanctum-error {
+  color: var(--sanctum-danger, #b42318);
+  font-size: 14px;
+}
+.sanctum-note {
+  color: var(--sanctum-muted-text, #5f5f66);
+  font-size: 14px;
+  margin: 8px 0 0;
+}
+.sanctum-wallet p,
+.sanctum-callback p {
+  margin: 0 0 12px;
+}
+.sanctum-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -15,8 +15,17 @@ function fakeIssuer(answers: Record<string, unknown>[], interval = 0.001) {
     const path = new URL(url).pathname;
     sent.push({ path, body: JSON.parse(String(init.body)) as Record<string, unknown> });
     if (path === "/agent/v1/registrations") {
-      return new Response(JSON.stringify({ device_code: "d".repeat(43), user_code: "WDJB-MJHT", verification_uri: "https://id.example.com/agents/claim",
-        verification_uri_complete: "https://id.example.com/agents/claim#code=WDJB-MJHT", expires_in: 600, interval }), { status: 201 });
+      return new Response(
+        JSON.stringify({
+          device_code: "d".repeat(43),
+          user_code: "WDJB-MJHT",
+          verification_uri: "https://id.example.com/agents/claim",
+          verification_uri_complete: "https://id.example.com/agents/claim#code=WDJB-MJHT",
+          expires_in: 600,
+          interval,
+        }),
+        { status: 201 },
+      );
     }
     const answer = answers.shift() ?? { error: "expired_token" };
     return new Response(JSON.stringify(answer), { status: "client_id" in answer ? 200 : 400 });
@@ -25,20 +34,50 @@ function fakeIssuer(answers: Record<string, unknown>[], interval = 0.001) {
 }
 
 test("registers with the public key only and waits through pending until claimed", async () => {
-  const { sent, fetcher } = fakeIssuer([{ error: "authorization_pending" }, { error: "authorization_pending" }, { client_id: "agt_example", owner_kind: "organization" }]);
-  const registration = await registerAgentWithSanctum({ issuer: "https://id.example.com", name: "Helper", publicKey: PUBLIC, fetch: fetcher });
-  assert.deepEqual([registration.userCode, registration.verificationUriComplete], ["WDJB-MJHT", "https://id.example.com/agents/claim#code=WDJB-MJHT"]);
+  const { sent, fetcher } = fakeIssuer([
+    { error: "authorization_pending" },
+    { error: "authorization_pending" },
+    { client_id: "agt_example", owner_kind: "organization" },
+  ]);
+  const registration = await registerAgentWithSanctum({
+    issuer: "https://id.example.com",
+    name: "Helper",
+    publicKey: PUBLIC,
+    fetch: fetcher,
+  });
+  assert.deepEqual(
+    [registration.userCode, registration.verificationUriComplete],
+    ["WDJB-MJHT", "https://id.example.com/agents/claim#code=WDJB-MJHT"],
+  );
   assert.deepEqual(await registration.waitForClaim(), { clientId: "agt_example", ownerKind: "organization" });
   assert.deepEqual(sent[0], { path: "/agent/v1/registrations", body: { name: "Helper", public_key: PUBLIC } });
-  assert.deepEqual(sent.slice(1).map((call) => call.body), Array(3).fill({ device_code: "d".repeat(43) }));
+  assert.deepEqual(
+    sent.slice(1).map((call) => call.body),
+    Array(3).fill({ device_code: "d".repeat(43) }),
+  );
 });
 
 test("a denied or expired registration ends with a clear error; cancelling stops waiting", async () => {
-  const denied = await registerAgentWithSanctum({ issuer: "https://id.example.com", name: "Helper", publicKey: PUBLIC, fetch: fakeIssuer([{ error: "access_denied" }]).fetcher });
+  const denied = await registerAgentWithSanctum({
+    issuer: "https://id.example.com",
+    name: "Helper",
+    publicKey: PUBLIC,
+    fetch: fakeIssuer([{ error: "access_denied" }]).fetcher,
+  });
   await assert.rejects(denied.waitForClaim(), { code: "access_denied" });
-  const expired = await registerAgentWithSanctum({ issuer: "https://id.example.com", name: "Helper", publicKey: PUBLIC, fetch: fakeIssuer([{ error: "expired_token" }]).fetcher });
+  const expired = await registerAgentWithSanctum({
+    issuer: "https://id.example.com",
+    name: "Helper",
+    publicKey: PUBLIC,
+    fetch: fakeIssuer([{ error: "expired_token" }]).fetcher,
+  });
   await assert.rejects(expired.waitForClaim(), { code: "expired" });
-  const slow = await registerAgentWithSanctum({ issuer: "https://id.example.com", name: "Helper", publicKey: PUBLIC, fetch: fakeIssuer([], 60).fetcher });
+  const slow = await registerAgentWithSanctum({
+    issuer: "https://id.example.com",
+    name: "Helper",
+    publicKey: PUBLIC,
+    fetch: fakeIssuer([], 60).fetcher,
+  });
   const abort = new AbortController();
   const waiting = slow.waitForClaim({ signal: abort.signal });
   abort.abort();
@@ -47,7 +86,18 @@ test("a denied or expired registration ends with a clear error; cancelling stops
 
 test("a private key or a plain-http issuer off loopback is refused before anything is sent", async () => {
   const { sent, fetcher } = fakeIssuer([]);
-  await assert.rejects(registerAgentWithSanctum({ issuer: "https://id.example.com", name: "Helper", publicKey: { ...PUBLIC, d: "secret" }, fetch: fetcher }), { code: "configuration" });
-  await assert.rejects(registerAgentWithSanctum({ issuer: "http://id.example.com", name: "Helper", publicKey: PUBLIC, fetch: fetcher }), { code: "configuration" });
+  await assert.rejects(
+    registerAgentWithSanctum({
+      issuer: "https://id.example.com",
+      name: "Helper",
+      publicKey: { ...PUBLIC, d: "secret" },
+      fetch: fetcher,
+    }),
+    { code: "configuration" },
+  );
+  await assert.rejects(
+    registerAgentWithSanctum({ issuer: "http://id.example.com", name: "Helper", publicKey: PUBLIC, fetch: fetcher }),
+    { code: "configuration" },
+  );
   assert.equal(sent.length, 0);
 });

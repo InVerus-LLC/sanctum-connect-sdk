@@ -21,8 +21,16 @@ export interface SanctumTheme {
 }
 
 const PROPERTIES: Record<keyof SanctumTheme, string> = {
-  accent: "--sanctum-accent", accentText: "--sanctum-accent-text", text: "--sanctum-text", mutedText: "--sanctum-muted-text", surface: "--sanctum-surface",
-  border: "--sanctum-border", danger: "--sanctum-danger", focusRing: "--sanctum-focus-ring", radius: "--sanctum-radius", font: "--sanctum-font",
+  accent: "--sanctum-accent",
+  accentText: "--sanctum-accent-text",
+  text: "--sanctum-text",
+  mutedText: "--sanctum-muted-text",
+  surface: "--sanctum-surface",
+  border: "--sanctum-border",
+  danger: "--sanctum-danger",
+  focusRing: "--sanctum-focus-ring",
+  radius: "--sanctum-radius",
+  font: "--sanctum-font",
 };
 const SAFE_VALUE = /^[\p{L}\p{N} #%(),./'"_+-]{1,120}$/u;
 const SAFE_SELECTOR = /^[\p{L}\p{N} .#:_[\]="'-]{1,120}$/u;
@@ -34,7 +42,8 @@ export function themeCss(theme: SanctumTheme, selector = ":root"): string {
     const property = PROPERTIES[name];
     if (value === undefined) return [];
     if (!property) throw new TypeError(`themeCss: unknown token ${String(name)}`);
-    if (!SAFE_VALUE.test(value) || /url\s*\(|expression\s*\(/iu.test(value)) throw new TypeError(`themeCss: the value for ${name} isn't allowed`);
+    if (!SAFE_VALUE.test(value) || /url\s*\(|expression\s*\(/iu.test(value))
+      throw new TypeError(`themeCss: the value for ${name} isn't allowed`);
     return [`${property}: ${value};`];
   });
   return `${selector} { ${declarations.join(" ")} }`;

@@ -1,15 +1,20 @@
 # Changelog
 
-Changes to `@inverus/connect-react`. Versions move together with `@inverus/connect`.
+Changes to `@sanctum.ai/connect-react`. Versions move together with `@sanctum.ai/connect`.
 Alpha APIs may change; review these notes before upgrading.
 
-## Unreleased
+## 0.1.0-alpha.0 — Sanctum namespace (24 November 2026)
 
+- Prevented late callbacks and refreshes from restoring sessions after sign-out, reconfiguration or unmount.
+- Isolated callback exchanges by client, store, URL and provider lifetime; removed settled token caching.
+- Coalesced simultaneous refreshes to avoid reusing rotating refresh tokens.
 - Clarified browser-only quick start and Next.js provider placement.
 - Expanded React and Next.js example setup, configuration and troubleshooting.
+- Migrated package identity and examples to `@sanctum.ai`; GitHub remains under InVerus-LLC.
+- Enforced ESLint, Prettier and the 299-line source limit.
 - Simplified documentation and support links.
 
-## 0.1.0-alpha.0 — 23 November 2026
+## Earlier @inverus release — 0.1.0-alpha.0 (23 November 2026)
 
 First public alpha, published under `@inverus` with npm provenance.
 

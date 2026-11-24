@@ -9,10 +9,23 @@
  * approve on Sanctum. Sanctum never signs on its own, and the token reveals nothing about the wallet beyond
  * its address. A stored session that is over, or an entry that isn't one, is forgotten.
  */
-import { cancelled, PROVIDER_ERRORS, ProviderRpcError, type WalletSessionHandle, type WalletSessionMethod, type WalletSessionState, type WalletSessionTransport } from "./wallet-session.ts";
+import {
+  cancelled,
+  PROVIDER_ERRORS,
+  ProviderRpcError,
+  type WalletSessionHandle,
+  type WalletSessionMethod,
+  type WalletSessionState,
+  type WalletSessionTransport,
+} from "./wallet-session.ts";
 import { sleep, SanctumWalletProvider } from "./wallet-session-provider.ts";
 
-import { forgetWalletSession, memoryWalletSessionStore, withWalletSessionStore, type WalletSessionStore } from "./wallet-session-store.ts";
+import {
+  forgetWalletSession,
+  memoryWalletSessionStore,
+  withWalletSessionStore,
+  type WalletSessionStore,
+} from "./wallet-session-store.ts";
 export { memoryWalletSessionStore, type WalletSessionStore } from "./wallet-session-store.ts";
 
 const DEFAULT_STORE = memoryWalletSessionStore();
@@ -20,14 +33,28 @@ const DEFAULT_KEY = "sanctum.walletSession";
 const STORED = /^[A-Za-z0-9_-]{43}$/u;
 const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u;
 
-interface Remembering { store?: WalletSessionStore; storeKey?: string; pollMs?: number; watchMs?: number }
+interface Remembering {
+  store?: WalletSessionStore;
+  storeKey?: string;
+  pollMs?: number;
+  watchMs?: number;
+}
 
-function providerFor(transport: WalletSessionTransport, session: WalletSessionHandle, state: WalletSessionState, options: Remembering, stored: string): SanctumWalletProvider {
+function providerFor(
+  transport: WalletSessionTransport,
+  session: WalletSessionHandle,
+  state: WalletSessionState,
+  options: Remembering,
+  stored: string,
+): SanctumWalletProvider {
   const store = options.store ?? DEFAULT_STORE;
   const key = options.storeKey ?? DEFAULT_KEY;
   return new SanctumWalletProvider(transport, session, state, {
-    ...(options.pollMs ? { pollMs: options.pollMs } : {}), ...(options.watchMs ? { watchMs: options.watchMs } : {}),
-    onClose: () => { void forgetWalletSession(store, key, stored).catch(() => undefined); },
+    ...(options.pollMs ? { pollMs: options.pollMs } : {}),
+    ...(options.watchMs ? { watchMs: options.watchMs } : {}),
+    onClose: () => {
+      void forgetWalletSession(store, key, stored).catch(() => undefined);
+    },
   });
 }
 
@@ -35,7 +62,14 @@ function parsed(value: string | null): WalletSessionHandle | null {
   if (value === null) return null;
   try {
     const entry = JSON.parse(value) as { v?: unknown; sessionId?: unknown; sessionToken?: unknown };
-    if (entry.v !== 1 || typeof entry.sessionId !== "string" || !SESSION_ID.test(entry.sessionId) || typeof entry.sessionToken !== "string" || !STORED.test(entry.sessionToken)) return null;
+    if (
+      entry.v !== 1 ||
+      typeof entry.sessionId !== "string" ||
+      !SESSION_ID.test(entry.sessionId) ||
+      typeof entry.sessionToken !== "string" ||
+      !STORED.test(entry.sessionToken)
+    )
+      return null;
     return { sessionId: entry.sessionId, sessionToken: entry.sessionToken };
   } catch {
     return null;
@@ -48,11 +82,16 @@ function parsed(value: string | null): WalletSessionHandle | null {
  * Rejection and expiry throw 4001. A cancelled (aborted) or failed attempt ends its own session, best
  * effort, so its pairing link stops working and a late approval can't leave a connected session nobody holds.
  */
-export async function connectSanctumWallet(options: {
-  transport: WalletSessionTransport; chains: string[]; methods: WalletSessionMethod[]; signal?: AbortSignal;
-  /** The pairing link (show it as a link or QR code, never log it) and when it stops working. */
-  onPairingUri: (uri: string, expiresAt: Date) => void;
-} & Remembering): Promise<SanctumWalletProvider> {
+export async function connectSanctumWallet(
+  options: {
+    transport: WalletSessionTransport;
+    chains: string[];
+    methods: WalletSessionMethod[];
+    signal?: AbortSignal;
+    /** The pairing link (show it as a link or QR code, never log it) and when it stops working. */
+    onPairingUri: (uri: string, expiresAt: Date) => void;
+  } & Remembering,
+): Promise<SanctumWalletProvider> {
   if (options.signal?.aborted) throw cancelled();
   const store = options.store ?? DEFAULT_STORE;
   const key = options.storeKey ?? DEFAULT_KEY;
@@ -69,7 +108,8 @@ export async function connectSanctumWallet(options: {
       state = await options.transport.state(session, signal);
     }
     if (options.signal?.aborted) throw cancelled();
-    if (state.status !== "active") throw new ProviderRpcError(PROVIDER_ERRORS.userRejected, `The connection was ${state.status}`, state.status);
+    if (state.status !== "active")
+      throw new ProviderRpcError(PROVIDER_ERRORS.userRejected, `The connection was ${state.status}`, state.status);
     await withWalletSessionStore(store, key, async () => {
       if (options.signal?.aborted) throw cancelled();
       await store.set(key, stored);
@@ -88,14 +128,19 @@ export async function connectSanctumWallet(options: {
  * The session remembered in `store` (default: this page's memory), if it is still active at Sanctum;
  * otherwise null, and the entry is forgotten. Network failures reject (the entry is kept).
  */
-export async function resumeSanctumWallet(options: { transport: WalletSessionTransport; signal?: AbortSignal } & Remembering): Promise<SanctumWalletProvider | null> {
+export async function resumeSanctumWallet(
+  options: { transport: WalletSessionTransport; signal?: AbortSignal } & Remembering,
+): Promise<SanctumWalletProvider | null> {
   if (options.signal?.aborted) throw cancelled();
   const store = options.store ?? DEFAULT_STORE;
   const key = options.storeKey ?? DEFAULT_KEY;
   const stored = await withWalletSessionStore(store, key, async () => store.get(key));
   if (options.signal?.aborted) throw cancelled();
   const session = parsed(stored);
-  const forget = async () => { await forgetWalletSession(store, key, stored); return null; };
+  const forget = async () => {
+    await forgetWalletSession(store, key, stored);
+    return null;
+  };
   if (!session || stored === null) return forget();
   let state: WalletSessionState;
   try {

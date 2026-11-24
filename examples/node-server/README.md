@@ -1,7 +1,7 @@
 # Node.js server authentication example
 
 A confidential OpenID Connect client built with `node:http` and
-`@inverus/connect`. Sign-in transactions and tokens stay on the server behind an
+`@sanctum.ai/connect`. Sign-in transactions and tokens stay on the server behind an
 opaque `HttpOnly`, `SameSite=Lax` session cookie.
 
 ## Prerequisites
@@ -25,10 +25,10 @@ from the **repository root**, not from this example's directory.
 
 Register a **confidential** client:
 
-| Setting | Value |
-| --- | --- |
-| Redirect URI | `http://127.0.0.1:4430/callback` |
-| Post-logout redirect URI | `http://127.0.0.1:4430/` |
+| Setting                  | Value                            |
+| ------------------------ | -------------------------------- |
+| Redirect URI             | `http://127.0.0.1:4430/callback` |
+| Post-logout redirect URI | `http://127.0.0.1:4430/`         |
 
 Create `.local/node-server.env` locally. The `.local/` directory is ignored by Git.
 Supply the real client ID and secret through your editor or secret manager, not
@@ -62,13 +62,13 @@ Open that URL. Ctrl+C stops the server.
    has been issued to this client.
 4. Select **Sign out** to revoke tokens and end the issuer session.
 
-| Route | Purpose |
-| --- | --- |
-| `GET /login` | Begin sign-in and save the transaction server-side |
-| `GET /callback` | Consume the transaction and validate the response |
-| `GET /me` | Fetch UserInfo for the signed-in subject |
-| `POST /refresh` | Rotate the refresh token |
-| `POST /logout` | Revoke tokens and redirect to issuer logout |
+| Route           | Purpose                                            |
+| --------------- | -------------------------------------------------- |
+| `GET /login`    | Begin sign-in and save the transaction server-side |
+| `GET /callback` | Consume the transaction and validate the response  |
+| `GET /me`       | Fetch UserInfo for the signed-in subject           |
+| `POST /refresh` | Rotate the refresh token                           |
+| `POST /logout`  | Revoke tokens and redirect to issuer logout        |
 
 ## Application boundaries
 
@@ -84,9 +84,9 @@ See [server.ts](src/server.ts) for the full implementation and the
 
 ## Troubleshooting
 
-| Symptom | Check |
-| --- | --- |
-| Process exits before listening | All required variables exist and issuer discovery succeeds. |
-| Callback rejected | Register the exact loopback host and port used by the server. |
-| Refresh returns `signed_out` | The client needs a valid refresh token; sign in again if it expired. |
-| A POST returns `cross_origin` | Use the page's own forms from `127.0.0.1`, not another origin. |
+| Symptom                        | Check                                                                |
+| ------------------------------ | -------------------------------------------------------------------- |
+| Process exits before listening | All required variables exist and issuer discovery succeeds.          |
+| Callback rejected              | Register the exact loopback host and port used by the server.        |
+| Refresh returns `signed_out`   | The client needs a valid refresh token; sign in again if it expired. |
+| A POST returns `cross_origin`  | Use the page's own forms from `127.0.0.1`, not another origin.       |

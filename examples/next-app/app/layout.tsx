@@ -5,8 +5,8 @@
  * client with PKCE.
  */
 import type { ReactNode } from "react";
-import { SanctumProvider } from "@inverus/connect-react";
-import "@inverus/connect-react/styles.css";
+import { SanctumProvider } from "@sanctum.ai/connect-react";
+import "@sanctum.ai/connect-react/styles.css";
 
 export const metadata = { title: "Sanctum Connect: Next.js example" };
 

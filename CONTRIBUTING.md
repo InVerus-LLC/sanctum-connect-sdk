@@ -20,6 +20,19 @@ The consumer suite installs packed SDKs outside the checkout, verifies declarati
 without `skipLibCheck`, renders React without browser globals and builds examples.
 It does not start a hosted identity service.
 
+## Code quality
+
+TypeScript uses strict mode, checked indexed access and exact optional properties.
+ESLint checks maintained TypeScript and examples, with typed promise checks for SDK
+source. Prettier and EditorConfig define formatting; `npm run check:lines` enforces
+299 physical lines for handwritten source and configuration. Generated npm lockfiles
+and ignored build output are not handwritten source.
+
+Run `npm run format` after editing, then `npm run check`. The combined check includes
+lint (zero warnings), formatting, source length, typechecks, tests and packed-package
+validation. Do not add suppressions or raise limits to hide failures. Keep domain
+logic, public types, transport helpers and presentation responsibilities separate.
+
 ## Changes and review
 
 - Keep features within existing public entry points and responsibility boundaries.

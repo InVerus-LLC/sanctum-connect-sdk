@@ -1,6 +1,6 @@
 # Agent authentication and delegation example
 
-A terminal agent using `@inverus/connect`. It creates an Ed25519 key pair,
+A terminal agent using `@sanctum.ai/connect`. It creates an Ed25519 key pair,
 registers its public key, waits for its owner to claim it, and requests a scoped
 resource token after an explicit delegation. The private key stays in memory.
 
@@ -23,13 +23,13 @@ from the **repository root**, not from this example's directory.
 
 ## Configure
 
-| Environment variable | Required | Purpose |
-| --- | --- | --- |
-| `SANCTUM_ISSUER` | Yes | Compatible issuer origin |
-| `SANCTUM_AGENT_NAME` | No | Display name; defaults to `Example agent` |
-| `SANCTUM_ALLOW_LOOPBACK` | For local HTTP | Set to `1` for a loopback development issuer |
-| `SANCTUM_RESOURCE` | For token request | Exact URI of the registered resource server |
-| `SANCTUM_RESOURCE_URL` | No | Allowed resource endpoint to call with the issued token |
+| Environment variable     | Required          | Purpose                                                 |
+| ------------------------ | ----------------- | ------------------------------------------------------- |
+| `SANCTUM_ISSUER`         | Yes               | Compatible issuer origin                                |
+| `SANCTUM_AGENT_NAME`     | No                | Display name; defaults to `Example agent`               |
+| `SANCTUM_ALLOW_LOOPBACK` | For local HTTP    | Set to `1` for a loopback development issuer            |
+| `SANCTUM_RESOURCE`       | For token request | Exact URI of the registered resource server             |
+| `SANCTUM_RESOURCE_URL`   | No                | Allowed resource endpoint to call with the issued token |
 
 Use a resource URI supplied by your issuer operator. The resource endpoint, tools
 and limits must agree with the delegation; arbitrary URLs do not gain access.
@@ -73,10 +73,10 @@ the SDK carries it to the issuer. See the [agent API guide](../../packages/conne
 
 ## Troubleshooting
 
-| Symptom | Check |
-| --- | --- |
-| Registration is refused | The issuer supports registration and permits this request. |
-| Claim code expired | Restart and use the newly issued URL and code. |
-| No delegation prompt appears | Set `SANCTUM_RESOURCE` before starting the process. |
-| Token request is refused | The grant is active and names this agent and resource. |
-| Resource call is denied | Its URL and required operation are within the delegated authority. |
+| Symptom                      | Check                                                              |
+| ---------------------------- | ------------------------------------------------------------------ |
+| Registration is refused      | The issuer supports registration and permits this request.         |
+| Claim code expired           | Restart and use the newly issued URL and code.                     |
+| No delegation prompt appears | Set `SANCTUM_RESOURCE` before starting the process.                |
+| Token request is refused     | The grant is active and names this agent and resource.             |
+| Resource call is denied      | Its URL and required operation are within the delegated authority. |

@@ -1,5 +1,5 @@
 {
-  "name": "@inverus/connect-react",
+  "name": "@sanctum.ai/connect-react",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "*.css"
   ],
   "dependencies": {
-    "@inverus/connect": "0.0.0"
+    "@sanctum.ai/connect": "0.0.0"
   },
   "peerDependencies": {
     "react": ">=19.0.0"
@@ -47,7 +47,7 @@
       "access": "public",
       "provenance": true
     },
-    "name": "@inverus/connect-react",
+    "name": "@sanctum.ai/connect-react",
     "repository": {
       "type": "git",
       "url": "git+https://github.com/InVerus-LLC/sanctum-connect-sdk.git",
@@ -58,11 +58,10 @@
       "url": "https://github.com/InVerus-LLC/sanctum-connect-sdk/issues"
     },
     "author": {
-      "name": "inVerus"
+      "name": "Sanctum"
     },
     "keywords": [
       "sanctum",
-      "inverus",
       "react",
       "nextjs",
       "authentication",

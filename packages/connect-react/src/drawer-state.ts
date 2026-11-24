@@ -3,7 +3,7 @@
  * and chain family). Back from the wallets returns to the methods; closing resets, so the next
  * opening starts from the methods with an empty search. (Leaving for Sanctum is useSignIn's state.)
  */
-import type { ChainFamily } from "@inverus/connect";
+import type { ChainFamily } from "@sanctum.ai/connect";
 
 export type DrawerView = "methods" | "wallets";
 
